@@ -178,33 +178,67 @@
             // ====================================================
             // YT-DLP
             // ====================================================
+            // await youtubedl(cleanUrl, {
+            //     noPlaylist: true,
+            //     extractAudio: true,
+            //     audioFormat: "mp3",
+            //     audioQuality: "0",   // best quality (100%)
+            //     jsRuntimes: `deno:${denoPath}`,
+            //     ffmpegLocation: path.dirname(ffmpegPath),
+            //     output: outputTemplate,
+
+            //     // Use cookies for authentication
+            //     cookies: path.join(__dirname, "cookies.txt"),
+
+            //     // Realistic user agent
+            //     userAgent:
+            //         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) " +
+            //         "AppleWebKit/537.36 (KHTML, like Gecko) " +
+            //         "Chrome/124.0 Safari/537.36",
+
+            //     // Gentle pacing to reduce rate‑limit errors
+            //     extractorArgs: "youtube:player_client=tv,web_safari",
+            //     sleepRequests: 2,
+            //     sleepInterval: 5,
+            //     maxSleepInterval: 10,
+
+            //     // Retry logic for temporary hiccups
+            //     retries: 3,
+            //     retrySleep: 5,
+            // });
+            
+            await new Promise(resolve => setTimeout(resolve, Math.random() * 3000 + 2000));
+
             await youtubedl(cleanUrl, {
                 noPlaylist: true,
                 extractAudio: true,
                 audioFormat: "mp3",
-                audioQuality: "0",   // best quality (100%)
+                audioQuality: "0",
                 jsRuntimes: `deno:${denoPath}`,
                 ffmpegLocation: path.dirname(ffmpegPath),
                 output: outputTemplate,
 
-                // Use cookies for authentication
+                // === BOT BYPASS ===
+                extractorArgs: "youtube:player_client=tv,web_safari",
+                sleepRequests: 3,
+                sleepInterval: 8,
+                maxSleepInterval: 15,
+
+                // Use cookies only if valid Netscape format
+                // cookies: path.join(__dirname, "cookies.txt"), -- anthe istapettillee
                 cookies: path.join(__dirname, "cookies.txt"),
 
-                // Realistic user agent
+
+
+                // Add a realistic user agent
                 userAgent:
                     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) " +
                     "AppleWebKit/537.36 (KHTML, like Gecko) " +
                     "Chrome/124.0 Safari/537.36",
 
-                // Gentle pacing to reduce rate‑limit errors
-                extractorArgs: "youtube:player_client=tv,web_safari",
-                sleepRequests: 2,
-                sleepInterval: 5,
-                maxSleepInterval: 10,
-
-                // Retry logic for temporary hiccups
+                // Retry logic for temporary blocks
                 retries: 3,
-                retrySleep: 5,
+                retrySleep: 10,
             });
 
 
