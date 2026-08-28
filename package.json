@@ -4,7 +4,8 @@
   "description": "Video to MP3 converter",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "refresh-cookies": "powershell ./refresh-cookies.ps1"
   },
   "dependencies": {
     "@ffmpeg-installer/ffmpeg": "^1.1.0",
