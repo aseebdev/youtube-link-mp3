@@ -92,6 +92,8 @@ app.post("/convert", async (req, res) => {
 
                 audioQuality: "0",
 
+                jsRuntimes: "deno",
+
                 ffmpegLocation: path.dirname(
                     ffmpegPath
                 ),

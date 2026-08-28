@@ -10,5 +10,8 @@
     "@ffmpeg-installer/ffmpeg": "^1.1.0",
     "express": "^5.1.0",
     "youtube-dl-exec": "^3.1.13"
+  },
+  "devDependencies": {
+    "deno-bin": "^2.2.7"
   }
 }
