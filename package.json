@@ -4,6 +4,7 @@
   "description": "Video to MP3 converter",
   "main": "server.js",
   "scripts": {
+    "postinstall": "npx youtube-dl-exec -U",
     "start": "node server.js"
   },
   "dependencies": {

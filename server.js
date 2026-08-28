@@ -183,24 +183,20 @@ app.post("/convert", async (req, res) => {
             cleanUrl,
             {
                 noPlaylist: true,
-
                 extractAudio: true,
-
                 audioFormat: "mp3",
-
                 audioQuality: "0",
-
-                // Cross-platform Deno runtime
                 jsRuntimes: `deno:${denoPath}`,
-
-                // Download EJS challenge solver from npm
                 remoteComponents: "ejs:npm",
-
-                // FFmpeg directory
                 ffmpegLocation: path.dirname(ffmpegPath),
+                output: outputTemplate,
 
-                // Temporary output
-                output: outputTemplate
+                // === BOT BYPASS ===
+                extractorArgs: "youtube:player_client=tv,web_safari",
+                sleepRequests: 2,
+                sleepInterval: 5,
+                maxSleepInterval: 10,
+                cookies: path.join(__dirname, "cookies.txt"),
             }
         );
 
