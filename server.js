@@ -196,9 +196,13 @@
                     "AppleWebKit/537.36 (KHTML, like Gecko) " +
                     "Chrome/124.0 Safari/537.36",
 
-                // Retry logic for temporary hiccups
+                // Gentle pacing to avoid rate‑limit
+                sleepRequests: 2,
+                sleepInterval: 5,
+                maxSleepInterval: 10,
+
                 retries: 3,
-                retrySleep: 5,   // shorter retry interval for speed
+                retrySleep: 5,
             });
 
 
