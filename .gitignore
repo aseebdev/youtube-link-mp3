@@ -1,2 +1,4 @@
-bin/ 
-downloads/ 
+bin/
+downloads/
+node_modules/
+.env
