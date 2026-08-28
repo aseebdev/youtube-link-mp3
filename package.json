@@ -8,9 +8,9 @@
   },
   "dependencies": {
     "@ffmpeg-installer/ffmpeg": "^1.1.0",
+    "deno": "^2.9.6",
     "express": "^5.1.0",
-    "youtube-dl-exec": "^3.1.13",
-    "deno-bin": "^2.2.7"
+    "youtube-dl-exec": "^3.1.13"
   },
   "allowScripts": {
     "deno-bin@2.2.7": true

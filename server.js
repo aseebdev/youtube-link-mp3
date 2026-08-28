@@ -142,7 +142,7 @@ app.post("/convert", async (req, res) => {
 
                 audioQuality: "0",
 
-                jsRuntimes: "deno",
+                jsRuntimes: `deno:${path.join(__dirname, "node_modules", "deno", "deno.exe")}`,
 
                 remoteComponents: "ejs:npm",
 
