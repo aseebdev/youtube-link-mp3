@@ -196,7 +196,10 @@
                 maxSleepInterval: 15,
 
                 // Use cookies only if valid Netscape format
-                // cookies: path.join(__dirname, "cookies.txt"),
+                // cookies: path.join(__dirname, "cookies.txt"), -- anthe istapettillee
+                cookies: path.join(__dirname, "cookies.txt"),
+
+
 
                 // Add a realistic user agent
                 userAgent:
