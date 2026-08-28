@@ -191,15 +191,13 @@ app.post("/convert", async (req, res) => {
                 audioQuality: "0",
 
                 // Cross-platform Deno runtime
-                jsRuntimes:
-                    `deno:${denoPath}`,
+                jsRuntimes: `deno:${denoPath}`,
 
-                // Download yt-dlp EJS components
+                // Download EJS challenge solver from npm
                 remoteComponents: "ejs:npm",
 
                 // FFmpeg directory
-                ffmpegLocation:
-                    path.dirname(ffmpegPath),
+                ffmpegLocation: path.dirname(ffmpegPath),
 
                 // Temporary output
                 output: outputTemplate
