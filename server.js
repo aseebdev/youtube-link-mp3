@@ -178,34 +178,39 @@
             // ====================================================
             // YT-DLP
             // ====================================================
-            await new Promise(resolve => setTimeout(resolve, Math.random() * 1 + 2));
+            await new Promise(resolve => setTimeout(resolve, Math.random() * 3000 + 2000));
 
             await youtubedl(cleanUrl, {
                 noPlaylist: true,
                 extractAudio: true,
                 audioFormat: "mp3",
-                audioQuality: "0",   // 100% best quality
+                audioQuality: "0",
                 jsRuntimes: `deno:${denoPath}`,
                 ffmpegLocation: path.dirname(ffmpegPath),
                 output: outputTemplate,
 
+                // === BOT BYPASS ===
+                extractorArgs: "youtube:player_client=tv,web_safari",
+                sleepRequests: 3,
+                sleepInterval: 8,
+                maxSleepInterval: 15,
+
+                // Use cookies only if valid Netscape format
+                // cookies: path.join(__dirname, "cookies.txt"), -- anthe istapettille
                 cookies: path.join(__dirname, "cookies.txt"),
 
+
+
+                // Add a realistic user agent
                 userAgent:
                     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) " +
                     "AppleWebKit/537.36 (KHTML, like Gecko) " +
                     "Chrome/124.0 Safari/537.36",
 
-                // Gentle pacing to avoid IP blocks
-                extractorArgs: "youtube:player_client=tv,web_safari",
-                sleepRequests: 2,
-                sleepInterval: 5,
-                maxSleepInterval: 10,
-
+                // Retry logic for temporary blocks
                 retries: 3,
-                retrySleep: 5,
+                retrySleep: 10,
             });
-
 
 
             // ====================================================
