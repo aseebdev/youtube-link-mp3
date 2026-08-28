@@ -129,8 +129,27 @@ app.post("/convert", async (req, res) => {
 
     } catch (error) {
 
-        console.error("Conversion failed:");
+        console.error("\n========== CONVERSION ERROR ==========");
+
+        console.error("Message:");
+        console.error(error.message);
+
+        console.error("Name:");
+        console.error(error.name);
+
+        console.error("Code:");
+        console.error(error.code);
+
+        console.error("stdout:");
+        console.error(error.stdout);
+
+        console.error("stderr:");
+        console.error(error.stderr);
+
+        console.error("Full error:");
         console.error(error);
+
+        console.error("=====================================\n");
 
         res.status(500).json({
             success: false,
@@ -139,6 +158,7 @@ app.post("/convert", async (req, res) => {
                 error.message ||
                 "Conversion failed."
         });
+
     }
 
 });
