@@ -133,7 +133,6 @@ app.post("/convert", async (req, res) => {
         await youtubedl(
             cleanUrl,
             {
-
                 noPlaylist: true,
 
                 extractAudio: true,
@@ -142,7 +141,7 @@ app.post("/convert", async (req, res) => {
 
                 audioQuality: "0",
 
-                jsRuntimes: `deno:${path.join(__dirname, "node_modules", "deno", "deno.exe")}`,
+                jsRuntimes: `deno:${denoPath}`,
 
                 remoteComponents: "ejs:npm",
 
@@ -150,7 +149,6 @@ app.post("/convert", async (req, res) => {
                     path.dirname(ffmpegPath),
 
                 output: outputTemplate
-
             }
         );
 
