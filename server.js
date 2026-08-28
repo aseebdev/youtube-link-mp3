@@ -182,7 +182,7 @@
                 noPlaylist: true,
                 extractAudio: true,
                 audioFormat: "mp3",
-                audioQuality: "0",   // 100% best quality
+                audioQuality: "0",   // best quality (100%)
                 jsRuntimes: `deno:${denoPath}`,
                 ffmpegLocation: path.dirname(ffmpegPath),
                 output: outputTemplate,
@@ -198,8 +198,9 @@
 
                 // Retry logic for temporary hiccups
                 retries: 3,
-                retrySleep: 5,   // shorter retry interval
+                retrySleep: 5,   // shorter retry interval for speed
             });
+
 
 
             // ====================================================
