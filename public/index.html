@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
 
     <meta
@@ -9,136 +10,244 @@
         content="width=device-width, initial-scale=1.0"
     >
 
+    <meta
+        name="theme-color"
+        content="#05050a"
+    >
+
+    <meta
+        name="description"
+        content="AudioFlux - Convert authorized YouTube videos to MP3."
+    >
+
     <title>AudioFlux — Video to MP3</title>
 
-    <link rel="stylesheet" href="style.css">
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
 
 </head>
 
+
 <body>
 
-    <div class="cursor-glow"></div>
+    <!-- Lightweight cursor glow -->
+    <div
+        class="cursor-glow"
+        aria-hidden="true"
+    ></div>
 
-    <div class="background">
+
+    <!-- Background effects -->
+    <div
+        class="background"
+        aria-hidden="true"
+    >
 
         <div class="orb orb-1"></div>
+
         <div class="orb orb-2"></div>
+
         <div class="orb orb-3"></div>
 
     </div>
 
+
+    <!-- Main content -->
     <main class="container">
 
         <section class="glass-card">
 
+
+            <!-- Logo -->
             <div class="logo">
 
-                <div class="logo-icon">
+                <div
+                    class="logo-icon"
+                    aria-hidden="true"
+                >
                     ♫
                 </div>
 
-                <span>RR AUDIOFLUX</span>
+                <span>
+                    RR AUDIOFLUX
+                </span>
 
             </div>
 
+
+            <!-- Hero -->
+            <header class="hero">
 
                 <div class="badge">
                     NEXT GENERATION AUDIO "by" RR
                 </div>
 
+
                 <h1>
+
                     Turn YT Video Into
-                    <span>Pure Sound</span>
+
+                    <span>
+                        Pure Sound
+                    </span>
+
                 </h1>
-                <br>
-                <h5>Powered by aseebdev</h5>
-                <br>
+
+
+                <h5>
+                    Powered by aseebdev
+                </h5>
+
 
                 <p>
-                    Paste the yt video link and convert authorized content
-                    into a downloadable MP3 file
-                    
+                    Paste the yt video link and convert
+                    authorized content into a downloadable
+                    MP3 file.
                 </p>
-                <br>
 
-            </div>
+            </header>
 
-            <div class="converter">
 
+            <!-- Converter -->
+            <section class="converter">
+
+
+                <!-- URL input -->
                 <div class="input-wrapper">
 
-                    <div class="link-icon">
+                    <div
+                        class="link-icon"
+                        aria-hidden="true"
+                    >
                         🔗
                     </div>
 
+
                     <input
-                        type="text"
+                        type="url"
                         id="videoUrl"
+                        name="videoUrl"
                         placeholder="Paste your video URL here..."
                         autocomplete="off"
+                        autocapitalize="off"
+                        spellcheck="false"
+                        aria-label="YouTube video URL"
                     >
+
 
                     <button
                         id="clearButton"
                         class="clear-button"
+                        type="button"
+                        aria-label="Clear URL"
                     >
                         ×
                     </button>
 
                 </div>
 
+
+                <!-- Convert button -->
                 <button
                     id="convertButton"
                     class="convert-button"
+                    type="button"
                 >
 
                     <span class="button-text">
                         CONVERT TO MP3
                     </span>
 
-                    <span class="button-icon">
+                    <span
+                        class="button-icon"
+                        aria-hidden="true"
+                    >
                         →
                     </span>
 
                 </button>
 
-            </div>
+            </section>
 
+
+            <!-- Status -->
             <div
                 id="status"
                 class="status"
+                aria-live="polite"
+                aria-atomic="true"
             >
                 Ready
             </div>
 
+
+            <!-- Features -->
             <div class="features">
 
-                <div class="feature">
-                    <span>⚡</span>
-                    Fast Processing
-                </div>
 
                 <div class="feature">
-                    <span>♫</span>
-                    MP3 Audio
+
+                    <span aria-hidden="true">
+                        ⚡
+                    </span>
+
+                    <span>
+                        Fast Processing
+                    </span>
+
                 </div>
 
+
                 <div class="feature">
-                    <span>⬇</span>
-                    Direct Download 🚀
+
+                    <span aria-hidden="true">
+                        ♫
+                    </span>
+
+                    <span>
+                        MP3 Audio
+                    </span>
+
                 </div>
+
+
+                <div class="feature">
+
+                    <span aria-hidden="true">
+                        ↓
+                    </span>
+
+                    <span>
+                        Direct Download 🚀
+                    </span>
+
+                </div>
+
 
             </div>
 
+
         </section>
 
-        <p class="footer">
-            Use only with content you own or are authorized to download.
-        </p>
+
+        <!-- Footer -->
+        <footer class="footer">
+
+            Use only with content you own
+            or are authorized to download.
+
+        </footer>
+
 
     </main>
 
-    <script src="script.js"></script>
+
+<script
+    src="script.js?v=2"
+    defer
+></script>
 
 </body>
 

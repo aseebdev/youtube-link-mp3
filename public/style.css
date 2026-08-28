@@ -1,14 +1,16 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap");
 
-/* =========================
+
+/* ============================================================
    RESET
-========================= */
+============================================================ */
 
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
 }
+
 
 :root {
     --bg: #05050a;
@@ -20,10 +22,11 @@
     --cyan: #42f5e9;
 }
 
+
 html {
     background: var(--bg);
+    color-scheme: dark;
 }
-
 
 
 body {
@@ -32,70 +35,93 @@ body {
     font-family:
         "Inter",
         system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
         sans-serif;
+
+    color: var(--text);
 
     background:
         radial-gradient(
             circle at 50% -20%,
-            rgba(101, 72, 255, 0.24),
+            rgba(101, 72, 255, 0.20),
             transparent 50%
         ),
         radial-gradient(
             circle at 0% 100%,
-            rgba(0, 194, 255, 0.14),
-            transparent 42%
+            rgba(0, 194, 255, 0.10),
+            transparent 40%
         ),
         radial-gradient(
             circle at 100% 100%,
-            rgba(255, 57, 180, 0.12),
-            transparent 38%
+            rgba(255, 57, 180, 0.08),
+            transparent 36%
         ),
         var(--bg);
-
-    color: var(--text);
 
     overflow-x: hidden;
 
     position: relative;
+
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
 }
 
-/* =========================
-   FUTURISTIC GRID
-========================= */
+
+/* ============================================================
+   GRID
+============================================================ */
 
 body::before {
-    contain: strict;
+
     content: "";
+
     position: fixed;
+
     inset: 0;
+
     pointer-events: none;
 
-    /* Raised alpha from 0.035 to 0.15 for actual visibility */
     background-image:
         linear-gradient(
-            rgba(255, 255, 255, 0.15) 1px,
+            rgba(255, 255, 255, 0.07) 1px,
             transparent 1px
         ),
         linear-gradient(
             90deg,
-            rgba(255, 255, 255, 0.15) 1px,
+            rgba(255, 255, 255, 0.07) 1px,
             transparent 1px
         );
 
     background-size: 70px 70px;
 
-    /* Added -webkit prefix for Safari/Chrome support */
-    -webkit-mask-image: linear-gradient(to bottom, black 0%, transparent 85%);
-    mask-image: linear-gradient(to bottom, black 0%, transparent 85%);
+    mask-image:
+        linear-gradient(
+            to bottom,
+            black 0%,
+            transparent 80%
+        );
 
-    opacity: 0.8;
-    z-index: 0; /* Ensures it stays on top of body bg, but keep lower than main content */
+    -webkit-mask-image:
+        linear-gradient(
+            to bottom,
+            black 0%,
+            transparent 80%
+        );
+
+    pointer-events: none;
+
+    z-index: 0;
 }
-/* =========================
-   BACKGROUND ORBS
-========================= */
+
+
+/* ============================================================
+   BACKGROUND
+============================================================ */
 
 .background {
+
     position: fixed;
 
     inset: 0;
@@ -104,151 +130,210 @@ body::before {
 
     pointer-events: none;
 
-    z-index: -1;
+    z-index: 0;
 }
 
+
 .orb {
-    will-change: transform;
-    transform: translate3d(0, 0, 0);
+
     position: absolute;
 
     border-radius: 50%;
 
-    filter: blur(70px);
+    pointer-events: none;
 
-    opacity: 0.45;
+    opacity: 0.28;
 
-    animation:
-        orbFloat
-        14s
-        infinite
-        alternate
-        ease-in-out;
+    transform: translate3d(0, 0, 0);
+
+    will-change: transform;
 }
+
+
+/*
+   No filter: blur() here.
+   Large filter-blur animations are expensive on weak PCs.
+*/
 
 .orb-1 {
-    width: 600px;
-    height: 600px;
 
-    background: #704cff;
+    width: 420px;
+    height: 420px;
 
-    top: -250px;
-    left: -200px;
+    top: -180px;
+    left: -140px;
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(112, 76, 255, 0.45),
+            rgba(112, 76, 255, 0.08) 60%,
+            transparent 72%
+        );
+
+    animation:
+        orbOne 22s ease-in-out infinite alternate;
 }
+
 
 .orb-2 {
-    width: 550px;
-    height: 550px;
 
-    background: #00b7ff;
-
-    bottom: -250px;
-    right: -180px;
-
-    animation-delay: -5s;
-}
-
-.orb-3 {
     width: 400px;
     height: 400px;
 
-    background: #ff42bd;
+    right: -150px;
+    bottom: -160px;
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(0, 183, 255, 0.38),
+            rgba(0, 183, 255, 0.06) 60%,
+            transparent 72%
+        );
+
+    animation:
+        orbTwo 26s ease-in-out infinite alternate;
+}
+
+
+.orb-3 {
+
+    width: 280px;
+    height: 280px;
 
     top: 35%;
-    left: 45%;
+    left: 48%;
 
-    opacity: 0.16;
+    opacity: 0.14;
 
-    animation-delay: -8s;
+    background:
+        radial-gradient(
+            circle,
+            rgba(255, 66, 189, 0.30),
+            transparent 70%
+        );
+
+    animation:
+        orbThree 30s ease-in-out infinite alternate;
 }
 
-@keyframes orbFloat {
 
-    0% {
+@keyframes orbOne {
+
+    from {
         transform:
-            translate3d(0, 0, 0)
-            scale(1);
+            translate3d(0, 0, 0);
     }
 
-    50% {
+    to {
         transform:
-            translate3d(100px, 70px, 0)
-            scale(1.15);
+            translate3d(45px, 30px, 0);
     }
 
-    100% {
-        transform:
-            translate3d(-40px, 120px, 0)
-            scale(0.95);
-    }
 }
 
-/* =========================
-   MOUSE FOLLOWING GLOW
-========================= */
+
+@keyframes orbTwo {
+
+    from {
+        transform:
+            translate3d(0, 0, 0);
+    }
+
+    to {
+        transform:
+            translate3d(-35px, -25px, 0);
+    }
+
+}
+
+
+@keyframes orbThree {
+
+    from {
+        transform:
+            translate3d(0, 0, 0);
+    }
+
+    to {
+        transform:
+            translate3d(25px, -25px, 0);
+    }
+
+}
+
+
+/* ============================================================
+   CURSOR GLOW
+============================================================ */
 
 .cursor-glow {
+
     position: fixed;
 
-    width: 520px;
-    height: 520px;
+    width: 320px;
+    height: 320px;
 
     border-radius: 50%;
 
     background:
         radial-gradient(
             circle,
-            rgba(111, 91, 255, 0.15),
-            rgba(0, 190, 255, 0.05) 35%,
+            rgba(111, 91, 255, 0.10),
+            rgba(0, 190, 255, 0.035) 35%,
             transparent 70%
         );
+
+    pointer-events: none;
 
     transform:
         translate3d(-50%, -50%, 0);
 
-    pointer-events: none;
+    z-index: 1;
 
-    filter: blur(8px);
-
-    z-index: 0;
-
-    transition: none;
     will-change: transform;
-    contain: strict;
 }
 
-/* =========================
+
+/* ============================================================
    MAIN CONTAINER
-========================= */
+============================================================ */
 
 .container {
+
     width: 100%;
-    min-height: 50vh;
+
+    min-height: 100vh;
 
     display: flex;
 
     flex-direction: column;
 
     align-items: center;
+
     justify-content: center;
 
-    padding: 40px 24px;
+    padding:
+        40px 24px;
 
     position: relative;
 
-    z-index: 1;
+    z-index: 2;
 }
 
-/* =========================
-   LIQUID GLASS CARD
-========================= */
+
+/* ============================================================
+   GLASS CARD
+============================================================ */
 
 .glass-card {
-    contain: paint;
-    transform: translateZ(0);
-    width: min(1200px, 800%);
 
-    padding: 58px;
+    width:
+        min(1200px, 100%);
+
+    padding:
+        58px;
 
     border-radius: 36px;
 
@@ -259,107 +344,99 @@ body::before {
     background:
         linear-gradient(
             135deg,
-            rgba(255, 255, 255, 0.11),
+            rgba(255, 255, 255, 0.09),
             rgba(255, 255, 255, 0.025)
         );
 
     border:
         1px solid
-        rgba(255, 255, 255, 0.14);
+        rgba(255, 255, 255, 0.12);
+
+    /*
+       Moderate glass effect.
+       Much cheaper than the original 18px blur.
+    */
 
     backdrop-filter:
-        blur(18px)
-        saturate(150%);
+        blur(10px)
+        saturate(120%);
 
     -webkit-backdrop-filter:
-        blur(18px)
-        saturate(150%);
+        blur(10px)
+        saturate(120%);
 
     box-shadow:
-        0 40px 120px
-        rgba(0, 0, 0, 0.65),
+        0 30px 80px
+        rgba(0, 0, 0, 0.50),
 
         inset
         0 1px 0
-        rgba(255, 255, 255, 0.16);
+        rgba(255, 255, 255, 0.12);
 
     animation:
         cardEntrance
-        0.8s
+        0.65s
         cubic-bezier(0.16, 1, 0.3, 1)
         both;
 }
 
+
 .glass-card::before {
+
     content: "";
 
     position: absolute;
 
-    width: 500px;
-    height: 500px;
+    width: 400px;
+    height: 400px;
 
-    top: -350px;
-    right: -180px;
+    top: -300px;
+    right: -150px;
 
     border-radius: 50%;
 
     background:
         radial-gradient(
             circle,
-            rgba(255, 255, 255, 0.2),
+            rgba(255, 255, 255, 0.10),
             transparent 68%
         );
 
     pointer-events: none;
 }
 
-.glass-card::after {
-    content: "";
-
-    position: absolute;
-
-    width: 350px;
-    height: 120px;
-
-    bottom: -100px;
-    left: 50%;
-
-    transform:
-        translateX(-50%);
-
-    background:
-        rgba(89, 81, 255, 0.3);
-
-    filter:
-        blur(45px);
-
-    pointer-events: none;
-}
 
 @keyframes cardEntrance {
 
     from {
+
         opacity: 0;
 
         transform:
-            translateY(35px)
-            scale(0.97);
+            translate3d(0, 25px, 0)
+            scale(0.985);
+
     }
 
     to {
+
         opacity: 1;
 
         transform:
-            translateY(0)
+            translate3d(0, 0, 0)
             scale(1);
+
     }
+
 }
 
-/* =========================
+
+/* ============================================================
    LOGO
-========================= */
+============================================================ */
 
 .logo {
+
     display: flex;
 
     align-items: center;
@@ -382,7 +459,9 @@ body::before {
     z-index: 2;
 }
 
+
 .logo-icon {
+
     width: 42px;
     height: 42px;
 
@@ -404,13 +483,15 @@ body::before {
         );
 
     box-shadow:
-        0 0 35px
-        rgba(102, 99, 255, 0.55);
+        0 0 24px
+        rgba(102, 99, 255, 0.40);
 
     position: relative;
 }
 
+
 .logo-icon::after {
+
     content: "";
 
     position: absolute;
@@ -421,31 +502,36 @@ body::before {
 
     border:
         1px solid
-        rgba(255, 255, 255, 0.3);
+        rgba(255, 255, 255, 0.25);
 }
 
-/* =========================
+
+/* ============================================================
    HERO
-========================= */
+============================================================ */
 
 .hero {
+
     text-align: center;
 
-    margin-bottom: 44px;
+    margin-bottom: 42px;
 
     position: relative;
 
     z-index: 2;
 }
 
+
 .badge {
+
     display: inline-flex;
 
     align-items: center;
 
     gap: 8px;
 
-    padding: 9px 16px;
+    padding:
+        9px 16px;
 
     border-radius: 999px;
 
@@ -454,9 +540,10 @@ body::before {
 
     border:
         1px solid
-        rgba(255, 255, 255, 0.11);
+        rgba(255, 255, 255, 0.10);
 
-    color: #b7b4c8;
+    color:
+        #b7b4c8;
 
     font-size: 10px;
 
@@ -467,7 +554,9 @@ body::before {
     margin-bottom: 25px;
 }
 
+
 .badge::before {
+
     content: "";
 
     width: 6px;
@@ -478,59 +567,67 @@ body::before {
     background: #57f2b0;
 
     box-shadow:
-        0 0 12px #57f2b0;
+        0 0 10px
+        rgba(87, 242, 176, 0.7);
 
     animation:
-        pulse
-        2s
-        infinite;
+        pulse 2.5s ease-in-out infinite;
 }
+
 
 @keyframes pulse {
 
     0%,
     100% {
-        transform: scale(1);
+
+        transform:
+            scale(1);
+
         opacity: 1;
+
     }
 
     50% {
-        transform: scale(1.5);
-        opacity: 0.5;
+
+        transform:
+            scale(1.3);
+
+        opacity: 0.65;
+
     }
+
 }
 
+
 h1 {
+
     font-family:
         "Space Grotesk",
         sans-serif;
 
     font-size:
-        clamp(30px, 10vw, 90px);
+        clamp(38px, 8vw, 90px);
 
-    line-height: 0.92;
+    line-height:
+        0.94;
 
-    letter-spacing: 1px;
-    
+    letter-spacing:
+        -2px;
 
-    font-weight: 800;
+    font-weight:
+        800;
 
-    margin-bottom: 24px;
+    margin-bottom:
+        24px;
 
     text-shadow:
-        0 10px 50px
-        rgba(0, 0, 0, 0.45);
+        0 10px 40px
+        rgba(0, 0, 0, 0.35);
 }
 
-h5{
-
-    color: red;
-    text-shadow:
-        0 10px 50px
-        rgba(0, 0, 0, 0.45);
-}
 
 h1 span {
+
     display: block;
 
     background:
@@ -542,49 +639,76 @@ h1 span {
             #7effe6 100%
         );
 
-    background-size: 200% auto;
+    background-size:
+        200% auto;
 
-    -webkit-background-clip: text;
+    -webkit-background-clip:
+        text;
 
-    background-clip: text;
+    background-clip:
+        text;
 
-    color: transparent;
+    color:
+        transparent;
 
     animation:
-        gradientMove
-        10s
-        linear
-        infinite;
+        gradientMove 14s linear infinite;
 }
+
 
 @keyframes gradientMove {
 
     from {
-        background-position: 0% center;
+        background-position:
+            0% center;
     }
 
     to {
-        background-position: 200% center;
+        background-position:
+            200% center;
     }
+
 }
+
+
+h5 {
+
+    color:
+        #ff3b30;
+
+    font-size:
+        14px;
+
+    margin-bottom:
+        22px;
+}
+
 
 .hero p {
-    max-width: 530px;
 
-    margin: auto;
+    max-width:
+        600px;
 
-    color: var(--muted);
+    margin:
+        0 auto;
 
-    line-height: 1.8;
+    color:
+        var(--muted);
 
-    font-size: 14px;
+    line-height:
+        1.8;
+
+    font-size:
+        14px;
 }
 
-/* =========================
+
+/* ============================================================
    CONVERTER
-========================= */
+============================================================ */
 
 .converter {
+
     display: flex;
 
     flex-direction: column;
@@ -596,333 +720,445 @@ h1 span {
     z-index: 2;
 }
 
+
 .input-wrapper {
+
     height: 72px;
 
     display: flex;
 
     align-items: center;
 
-    padding: 0 12px 0 22px;
+    padding:
+        0 12px 0 22px;
 
-    border-radius: 20px;
+    border-radius:
+        20px;
 
     background:
-        rgba(0, 0, 0, 0.24);
+        rgba(0, 0, 0, 0.22);
 
     border:
         1px solid
-        rgba(255, 255, 255, 0.1);
+        rgba(255, 255, 255, 0.09);
 
     box-shadow:
         inset
         0 1px 2px
-        rgba(0, 0, 0, 0.4);
+        rgba(0, 0, 0, 0.30);
 
-    transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+    transition:
+        border-color 0.18s ease,
+        background-color 0.18s ease,
+        box-shadow 0.18s ease;
 }
+
 
 .input-wrapper:hover {
+
     border-color:
-        rgba(255, 255, 255, 0.2);
+        rgba(255, 255, 255, 0.16);
+
 }
+
 
 .input-wrapper:focus-within {
+
     border-color:
-        rgba(126, 116, 255, 0.9);
+        rgba(126, 116, 255, 0.75);
 
     background:
-        rgba(20, 18, 45, 0.45);
+        rgba(20, 18, 45, 0.38);
 
     box-shadow:
-        0 0 0 4px
-        rgba(117, 93, 255, 0.12),
-
-        0 0 45px
-        rgba(90, 90, 255, 0.15);
+        0 0 0 3px
+        rgba(117, 93, 255, 0.10);
 }
+
 
 .link-icon {
-    margin-right: 14px;
 
-    opacity: 0.7;
+    margin-right:
+        14px;
 
-    transition: 0.25s;
+    opacity:
+        0.7;
 }
 
-.input-wrapper:focus-within .link-icon {
-    opacity: 1;
-
-    transform:
-        rotate(-8deg)
-        scale(1.1);
-}
 
 input {
-    flex: 1;
 
-    height: 100%;
+    flex:
+        1;
 
-    min-width: 0;
+    height:
+        100%;
 
-    background: transparent;
+    min-width:
+        0;
 
-    border: none;
+    background:
+        transparent;
 
-    outline: none;
+    border:
+        none;
 
-    color: white;
+    outline:
+        none;
 
-    font-size: 15px;
+    color:
+        white;
+
+    font-size:
+        15px;
+
+    font-family:
+        inherit;
 }
+
 
 input::placeholder {
-    color: #666679;
+
+    color:
+        #666679;
 }
+
 
 .clear-button {
-    width: 42px;
-    height: 42px;
 
-    border: none;
+    width:
+        44px;
 
-    border-radius: 13px;
+    height:
+        44px;
+
+    border:
+        none;
+
+    border-radius:
+        13px;
 
     background:
-        rgba(255, 255, 255, 0.055);
+        transparent;
 
-    color: white;
+    color:
+        white;
 
-    font-size: 23px;
+    font-size:
+        23px;
 
-    cursor: pointer;
+    cursor:
+        pointer;
 
-    opacity: 0;
+    opacity:
+        0;
 
-    pointer-events: none;
+    pointer-events:
+        none;
 
-    transition: 0.25s;
+    transition:
+        opacity 0.16s ease,
+        transform 0.16s ease,
+        background-color 0.16s ease;
 }
+
 
 .clear-button.visible {
-    opacity: 1;
 
-    pointer-events: auto;
+    opacity:
+        1;
+
+    pointer-events:
+        auto;
 }
+
 
 .clear-button:hover {
-    background:
-        rgba(255, 80, 120, 0.15);
 
-    transform: rotate(90deg);
+    background:
+        rgba(255, 80, 120, 0.12);
+
+    transform:
+        rotate(90deg);
 }
 
-/* =========================
+
+/* ============================================================
    CONVERT BUTTON
-========================= */
+============================================================ */
 
 .convert-button {
-    will-change: transform;
-    height: 72px;
+
+    height:
+        72px;
 
     border:
         1px solid
-        rgba(255, 255, 255, 0.15);
+        rgba(255, 255, 255, 0.14);
 
-    border-radius: 20px;
+    border-radius:
+        20px;
 
-    cursor: pointer;
+    cursor:
+        pointer;
 
-    color: white;
+    color:
+        white;
 
-    font-weight: 800;
+    font-weight:
+        800;
 
-    font-size: 13px;
+    font-size:
+        13px;
 
-    letter-spacing: 2px;
+    letter-spacing:
+        2px;
 
     background:
         linear-gradient(
             110deg,
             #704cff,
             #4c7dff,
-            #00c9f5,
-            #704cff
+            #00c9f5
         );
 
-    background-size: 300% 100%;
-
     box-shadow:
-        0 18px 45px
-        rgba(64, 95, 255, 0.3),
+        0 16px 40px
+        rgba(64, 95, 255, 0.25),
 
         inset
         0 1px 0
-        rgba(255, 255, 255, 0.25);
+        rgba(255, 255, 255, 0.20);
 
-    display: flex;
+    display:
+        flex;
 
-    align-items: center;
+    align-items:
+        center;
 
-    justify-content: center;
+    justify-content:
+        center;
 
-    gap: 16px;
+    gap:
+        16px;
 
-    position: relative;
+    position:
+        relative;
 
-    overflow: hidden;
+    overflow:
+        hidden;
 
-    transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
-
-    animation:
-        buttonGradient
-        12s
-        linear
-        infinite;
+    transition:
+        transform 0.16s ease,
+        box-shadow 0.16s ease,
+        filter 0.16s ease;
 }
 
-@keyframes buttonGradient {
 
-    from {
-        background-position: 0% center;
-    }
-
-    to {
-        background-position: 300% center;
-    }
-}
+/*
+   Lightweight shine.
+   No continuous animation.
+*/
 
 .convert-button::before {
-    content: "";
 
-    position: absolute;
+    content:
+        "";
 
-    top: 0;
+    position:
+        absolute;
 
-    left: -120%;
+    top:
+        0;
 
-    width: 70%;
-    height: 100%;
+    left:
+        -100%;
+
+    width:
+        45%;
+
+    height:
+        100%;
 
     background:
         linear-gradient(
             90deg,
             transparent,
-            rgba(255, 255, 255, 0.3),
+            rgba(255, 255, 255, 0.18),
             transparent
         );
 
-    transform: skewX(-25deg);
+    transform:
+        skewX(-25deg);
 
-    transition: 0.8s;
+    transition:
+        left 0.55s ease;
+
+    pointer-events:
+        none;
 }
+
 
 .convert-button:hover::before {
-    left: 150%;
+
+    left:
+        150%;
 }
+
 
 .convert-button:hover {
+
     transform:
-        translateY(-4px)
-        scale(1.01);
+        translate3d(0, -2px, 0);
 
     box-shadow:
-        0 28px 70px
-        rgba(66, 115, 255, 0.5),
+        0 22px 50px
+        rgba(66, 115, 255, 0.34);
 
-        0 0 50px
-        rgba(0, 212, 255, 0.16);
+    filter:
+        brightness(1.04);
 }
+
 
 .convert-button:active {
+
     transform:
-        translateY(0)
-        scale(0.98);
+        translate3d(0, 1px, 0)
+        scale(0.99);
 }
+
 
 .convert-button:disabled {
-    opacity: 0.6;
 
-    cursor: not-allowed;
+    opacity:
+        0.62;
 
-    transform: none;
+    cursor:
+        wait;
+
+    transform:
+        none;
+
+    filter:
+        none;
 }
+
 
 .button-icon {
-    font-size: 23px;
 
-    transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+    font-size:
+        23px;
+
+    transition:
+        transform 0.16s ease;
 }
 
-.convert-button:hover .button-icon {
+
+.convert-button:hover
+.button-icon {
+
     transform:
-        translateX(7px);
+        translate3d(5px, 0, 0);
 }
 
-/* =========================
+
+/* ============================================================
    STATUS
-========================= */
+============================================================ */
 
 .status {
-    margin-top: 24px;
 
-    min-height: 25px;
+    margin-top:
+        24px;
 
-    display: flex;
+    min-height:
+        25px;
 
-    align-items: center;
+    display:
+        flex;
 
-    justify-content: center;
+    align-items:
+        center;
 
-    text-align: center;
+    justify-content:
+        center;
 
-    color: var(--muted);
+    text-align:
+        center;
 
-    font-size: 13px;
+    color:
+        var(--muted);
 
-    position: relative;
+    font-size:
+        13px;
 
-    z-index: 2;
+    position:
+        relative;
+
+    z-index:
+        2;
 }
+
 
 .status.success {
-    color: #57f2b0;
+
+    color:
+        #57f2b0;
 }
+
 
 .status.error {
-    color: #ff7c91;
+
+    color:
+        #ff7c91;
 }
 
-/* =========================
+
+/* ============================================================
    FEATURES
-========================= */
+============================================================ */
 
 .features {
-    display: flex;
 
-    justify-content: center;
+    display:
+        flex;
 
-    flex-wrap: wrap;
+    justify-content:
+        center;
 
-    gap: 12px;
+    flex-wrap:
+        wrap;
 
-    margin-top: 38px;
+    gap:
+        12px;
 
-    position: relative;
+    margin-top:
+        38px;
 
-    z-index: 2;
+    position:
+        relative;
+
+    z-index:
+        2;
 }
 
+
 .feature {
-    display: flex;
 
-    align-items: center;
+    display:
+        flex;
 
-    gap: 8px;
+    align-items:
+        center;
 
-    padding: 8px 13px;
+    gap:
+        8px;
 
-    border-radius: 999px;
+    padding:
+        8px 13px;
+
+    border-radius:
+        999px;
 
     background:
         rgba(255, 255, 255, 0.035);
@@ -931,185 +1167,263 @@ input::placeholder {
         1px solid
         rgba(255, 255, 255, 0.06);
 
-    color: #9898aa;
+    color:
+        #9898aa;
 
-    font-size: 11px;
+    font-size:
+        11px;
 
-    transition: 0.25s;
+    transition:
+        transform 0.16s ease,
+        background-color 0.16s ease,
+        color 0.16s ease;
 }
+
 
 .feature:hover {
-    color: white;
+
+    color:
+        white;
 
     background:
-        rgba(255, 255, 255, 0.07);
-
-    border-color:
-        rgba(255, 255, 255, 0.14);
+        rgba(255, 255, 255, 0.06);
 
     transform:
-        translateY(-2px);
+        translate3d(0, -2px, 0);
 }
 
-/* =========================
+
+/* ============================================================
    FOOTER
-========================= */
+============================================================ */
 
 .footer {
-    margin-top: 25px;
 
-    color: #626276;
+    margin-top:
+        25px;
 
-    font-size: 10px;
+    color:
+        #626276;
 
-    letter-spacing: 0.5px;
+    font-size:
+        10px;
 
-    text-align: center;
+    letter-spacing:
+        0.5px;
+
+    text-align:
+        center;
 }
 
-/* =========================
+
+/* ============================================================
    MOBILE
-========================= */
+============================================================ */
 
 @media (max-width: 650px) {
 
     .container {
-        padding: 20px 16px;
+
+        padding:
+            24px 16px;
+
+        justify-content:
+            flex-start;
+
+        padding-top:
+            30px;
+
     }
+
 
     .glass-card {
-    contain: paint;
-    transform: translateZ(0);
-        padding: 38px 22px;
 
-        border-radius: 28px;
+        padding:
+            38px 22px;
+
+        border-radius:
+            28px;
+
     }
+
 
     .logo {
-        margin-bottom: 45px;
+
+        margin-bottom:
+            42px;
+
     }
+
 
     h1 {
-        letter-spacing: -2.5px;
+
+        font-size:
+            clamp(36px, 12vw, 60px);
+
+        letter-spacing:
+            -1.5px;
+
     }
 
-    .orb-1,
-    .orb-2 {
-        width: 400px;
-        height: 400px;
-    }
 
     .cursor-glow {
-        display: none;
+
+        display:
+            none;
+
     }
+
 
     .input-wrapper,
     .convert-button {
-    will-change: transform;
-        height: 64px;
+
+        height:
+            64px;
+
     }
+
 
     .features {
-        gap: 8px;
+
+        gap:
+            8px;
+
     }
+
 }
 
-/* =========================
-   REDUCE MOTION
-========================= */
+
+/* ============================================================
+   LOW POWER / REDUCED MOTION
+============================================================ */
 
 @media (prefers-reduced-motion: reduce) {
 
     *,
     *::before,
     *::after {
-        animation: none !important;
-        transition: none !important;
-    }
-}
 
-/* =========================
-   PERFORMANCE OPTIMIZATION
-========================= */
+        animation:
+            none !important;
 
-@media (max-width: 900px) {
-    .orb {
-        filter: blur(55px);
+        transition:
+            none !important;
+
+        scroll-behavior:
+            auto !important;
+
     }
 
-    .glass-card {
-        backdrop-filter: blur(14px) saturate(140%);
-        -webkit-backdrop-filter: blur(14px) saturate(140%);
-    }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-    .cursor-glow {
-        will-change: transform;
-    }
-}
-
-/* Avoid expensive backdrop-filter on browsers that do not support it */
-@supports not ((backdrop-filter: blur(1px))) {
-    .glass-card {
-        background: rgba(18, 18, 30, 0.92);
-    }
 }
 
 
-/* =========================
-   BUTTER-SMOOTH RENDERING
-   ========================= */
+/* ============================================================
+   TOUCH DEVICES
+============================================================ */
 
-/* Keep animated/composited elements on their own rendering layer. */
-.orb,
-.cursor-glow,
-.convert-button {
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
-}
-
-/* Only animate transform/opacity where possible. */
-.logo-icon,
-.badge::before,
-.button-icon,
-.clear-button,
-.feature {
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
-}
-
-/* Avoid unnecessary text rasterization work during animations. */
-h1 span {
-    will-change: background-position;
-}
-
-/* Reduce expensive hover work on touch devices. */
 @media (hover: none) {
-    .convert-button:hover,
-    .feature:hover,
-    .clear-button:hover,
-    .convert-button:hover::before {
-        transform: none;
+
+    .cursor-glow {
+
+        display:
+            none;
+
     }
+
+
+    .convert-button:hover {
+
+        transform:
+            none;
+
+        filter:
+            none;
+
+    }
+
+
+    .convert-button:hover::before {
+
+        left:
+            -100%;
+
+    }
+
+
+    .feature:hover {
+
+        transform:
+            none;
+
+    }
+
 }
 
-/* Lower rendering cost on smaller displays. */
-@media (max-width: 650px) {
-    .orb {
-        filter: blur(45px);
-    }
+
+/* ============================================================
+   VERY SMALL / WEAK DEVICES
+============================================================ */
+
+@media (max-width: 500px) {
 
     .glass-card {
-        backdrop-filter: blur(10px) saturate(135%);
-        -webkit-backdrop-filter: blur(10px) saturate(135%);
+
+        /*
+           Remove glass blur on small devices.
+           Solid translucent background is much cheaper.
+        */
+
+        backdrop-filter:
+            none;
+
+        -webkit-backdrop-filter:
+            none;
+
+        background:
+            rgba(15, 15, 25, 0.88);
+
     }
 
-    h1 span {
-        animation-duration: 14s;
+
+    .orb {
+
+        animation:
+            none;
+
     }
 
-    .convert-button {
-        animation-duration: 16s;
+
+    .orb-3 {
+
+        display:
+            none;
+
     }
+
+
+    body::before {
+
+        opacity:
+            0.55;
+
+    }
+
+}
+
+
+/* ============================================================
+   NO BACKDROP-FILTER SUPPORT
+============================================================ */
+
+@supports not (
+    (backdrop-filter: blur(1px))
+) {
+
+    .glass-card {
+
+        background:
+            rgba(15, 15, 25, 0.90);
+
+    }
+
 }
