@@ -196,7 +196,7 @@
                     sleepRequests: 2,
                     sleepInterval: 5,
                     maxSleepInterval: 10,
-                    cookies: path.join(__dirname, "cookies.txt"),
+                    // cookies: path.join(__dirname, "cookies.txt"),
                 }
             );
 
