@@ -1,9 +1,17 @@
-const videoUrl = document.getElementById("videoUrl");
-const convertButton = document.getElementById("convertButton");
-const clearButton = document.getElementById("clearButton");
-const status = document.getElementById("status");
-const cursorGlow = document.querySelector(".cursor-glow");
+const videoUrl =
+    document.getElementById("videoUrl");
 
+const convertButton =
+    document.getElementById("convertButton");
+
+const clearButton =
+    document.getElementById("clearButton");
+
+const status =
+    document.getElementById("status");
+
+const cursorGlow =
+    document.querySelector(".cursor-glow");
 
 // ============================================================
 // CURSOR GLOW
@@ -19,7 +27,9 @@ let glowFrame = 0;
 
 if (
     cursorGlow &&
-    window.matchMedia("(hover: hover) and (pointer: fine)").matches
+    window.matchMedia(
+        "(hover: hover) and (pointer: fine)"
+    ).matches
 ) {
 
     document.addEventListener(
@@ -30,24 +40,28 @@ if (
             mouseY = event.clientY;
 
             if (!glowFrame) {
-                glowFrame = requestAnimationFrame(
-                    updateCursorGlow
-                );
-            }
 
+                glowFrame =
+                    requestAnimationFrame(
+                        updateCursorGlow
+                    );
+            }
         },
         {
             passive: true
         }
     );
-
 }
-
 
 function updateCursorGlow() {
 
-    glowX += (mouseX - glowX) * 0.16;
-    glowY += (mouseY - glowY) * 0.16;
+    glowX +=
+        (mouseX - glowX) *
+        0.16;
+
+    glowY +=
+        (mouseY - glowY) *
+        0.16;
 
     cursorGlow.style.transform =
         "translate3d(" +
@@ -56,23 +70,31 @@ function updateCursorGlow() {
         glowY +
         "px,0) translate3d(-50%,-50%,0)";
 
-    const dx = Math.abs(mouseX - glowX);
-    const dy = Math.abs(mouseY - glowY);
-
-    if (dx > 0.5 || dy > 0.5) {
-
-        glowFrame = requestAnimationFrame(
-            updateCursorGlow
+    const dx =
+        Math.abs(
+            mouseX - glowX
         );
+
+    const dy =
+        Math.abs(
+            mouseY - glowY
+        );
+
+    if (
+        dx > 0.5 ||
+        dy > 0.5
+    ) {
+
+        glowFrame =
+            requestAnimationFrame(
+                updateCursorGlow
+            );
 
     } else {
 
         glowFrame = 0;
-
     }
-
 }
-
 
 // ============================================================
 // INPUT
@@ -90,14 +112,10 @@ if (videoUrl) {
                     "visible",
                     videoUrl.value.length > 0
                 );
-
             }
-
         }
     );
-
 }
-
 
 // ============================================================
 // CLEAR BUTTON
@@ -121,12 +139,9 @@ if (clearButton) {
             );
 
             videoUrl.focus();
-
         }
     );
-
 }
-
 
 // ============================================================
 // CONVERT BUTTON
@@ -138,9 +153,7 @@ if (convertButton) {
         "click",
         convertAudio
     );
-
 }
-
 
 // ============================================================
 // ENTER KEY
@@ -152,19 +165,17 @@ if (videoUrl) {
         "keydown",
         function (event) {
 
-            if (event.key === "Enter") {
+            if (
+                event.key === "Enter"
+            ) {
 
                 event.preventDefault();
 
                 convertAudio();
-
             }
-
         }
     );
-
 }
-
 
 // ============================================================
 // CONVERT
@@ -175,6 +186,9 @@ async function convertAudio() {
     const url =
         videoUrl.value.trim();
 
+    // --------------------------------------------------------
+    // Validate URL
+    // --------------------------------------------------------
 
     if (!url) {
 
@@ -186,37 +200,33 @@ async function convertAudio() {
         videoUrl.focus();
 
         return;
-
     }
 
+    // --------------------------------------------------------
+    // Prevent duplicate requests
+    // --------------------------------------------------------
 
     if (convertButton.disabled) {
         return;
     }
 
-
     convertButton.disabled = true;
-
 
     const buttonText =
         convertButton.querySelector(
             ".button-text"
         );
 
-
     if (buttonText) {
 
         buttonText.textContent =
             "PROCESSING...";
-
     }
-
 
     setStatus(
         "Extracting audio... please wait.",
         ""
     );
-
 
     try {
 
@@ -245,9 +255,8 @@ async function convertAudio() {
                 }
             );
 
-
         // ====================================================
-        // READ RESPONSE TYPE
+        // RESPONSE TYPE
         // ====================================================
 
         const contentType =
@@ -256,7 +265,6 @@ async function convertAudio() {
                     "content-type"
                 ) || ""
             ).toLowerCase();
-
 
         // ====================================================
         // SERVER ERROR
@@ -269,12 +277,6 @@ async function convertAudio() {
                 response.status +
                 ").";
 
-
-            /*
-             * Only parse JSON when the server
-             * actually says it returned JSON.
-             */
-
             if (
                 contentType.includes(
                     "application/json"
@@ -286,7 +288,6 @@ async function convertAudio() {
                     const errorData =
                         await response.json();
 
-
                     if (
                         errorData &&
                         errorData.error
@@ -294,7 +295,6 @@ async function convertAudio() {
 
                         errorMessage =
                             errorData.error;
-
                     }
 
                 } catch (jsonError) {
@@ -303,15 +303,9 @@ async function convertAudio() {
                         "Error JSON parsing failed:",
                         jsonError
                     );
-
                 }
 
             } else {
-
-                /*
-                 * Server returned HTML/text/etc.
-                 * Do NOT call response.json().
-                 */
 
                 try {
 
@@ -324,29 +318,19 @@ async function convertAudio() {
                             "Server response:",
                             text
                         );
-
                     }
 
                 } catch {}
-
             }
-
 
             throw new Error(
                 errorMessage
             );
-
         }
 
-
         // ====================================================
-        // SUCCESS
+        // DIRECT AUDIO RESPONSE
         // ====================================================
-
-        /*
-         * OPTION A:
-         * Server returns MP3 directly.
-         */
 
         if (
             contentType.includes(
@@ -360,38 +344,30 @@ async function convertAudio() {
             const blob =
                 await response.blob();
 
-
             if (!blob.size) {
 
                 throw new Error(
                     "The MP3 file is empty."
                 );
-
             }
-
 
             downloadBlob(
                 blob,
                 "audio.mp3"
             );
 
-
             setStatus(
                 "MP3 ready! Your download has started.",
                 "success"
             );
 
-
             resetButton();
 
             return;
-
         }
 
-
         // ====================================================
-        // OPTION B:
-        // SERVER RETURNS JSON
+        // JSON RESPONSE
         // ====================================================
 
         if (
@@ -403,7 +379,6 @@ async function convertAudio() {
             const data =
                 await response.json();
 
-
             if (
                 !data ||
                 data.success !== true
@@ -413,25 +388,21 @@ async function convertAudio() {
                     data?.error ||
                     "Conversion failed."
                 );
-
             }
-
 
             if (!data.file) {
 
                 throw new Error(
                     "Server did not provide a download file."
                 );
-
             }
 
+            // =================================================
+            // NATIVE BROWSER DOWNLOAD
+            // =================================================
 
-            /*
-             * Let the browser download the server file.
-             *
-             * The server deletes its temporary
-             * copy after the response finishes.
-             */
+            // The browser handles the file transfer directly.
+            // The complete MP3 is NOT loaded into JavaScript.
 
             const link =
                 document.createElement("a");
@@ -442,6 +413,9 @@ async function convertAudio() {
             link.download =
                 "audio.mp3";
 
+            link.style.display =
+                "none";
+
             document.body.appendChild(
                 link
             );
@@ -450,28 +424,23 @@ async function convertAudio() {
 
             link.remove();
 
-
             setStatus(
                 "MP3 ready! Your download has started.",
                 "success"
             );
 
-
             resetButton();
 
             return;
-
         }
 
-
         // ====================================================
-        // UNKNOWN SUCCESS RESPONSE
+        // UNKNOWN RESPONSE
         // ====================================================
 
         throw new Error(
             "The server returned an unexpected response."
         );
-
 
     } catch (error) {
 
@@ -479,7 +448,6 @@ async function convertAudio() {
             "Conversion error:",
             error
         );
-
 
         setStatus(
             error.message ||
@@ -492,18 +460,13 @@ async function convertAudio() {
         convertButton.disabled =
             false;
 
-
         if (buttonText) {
 
             buttonText.textContent =
                 "CONVERT TO MP3";
-
         }
-
     }
-
 }
-
 
 // ============================================================
 // DOWNLOAD BLOB
@@ -519,17 +482,14 @@ function downloadBlob(
             blob
         );
 
-
     const link =
         document.createElement("a");
-
 
     link.href =
         downloadUrl;
 
     link.download =
         filename;
-
 
     document.body.appendChild(
         link
@@ -538,7 +498,6 @@ function downloadBlob(
     link.click();
 
     link.remove();
-
 
     setTimeout(
         function () {
@@ -550,9 +509,7 @@ function downloadBlob(
         },
         1000
     );
-
 }
-
 
 // ============================================================
 // STATUS
@@ -567,24 +524,19 @@ function setStatus(
         return;
     }
 
-
     status.textContent =
         message;
 
     status.className =
         "status";
 
-
     if (type) {
 
         status.classList.add(
             type
         );
-
     }
-
 }
-
 
 // ============================================================
 // BUTTON RESET
@@ -597,12 +549,9 @@ function resetButton() {
             ".button-text"
         );
 
-
     if (buttonText) {
 
         buttonText.textContent =
             "CONVERT TO MP3";
-
     }
-
 }
