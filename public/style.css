@@ -38,7 +38,7 @@ body {
         radial-gradient(
             circle at 50% -20%,
             rgba(101, 72, 255, 0.24),
-            transparent 40%
+            transparent 50%
         ),
         radial-gradient(
             circle at 0% 100%,
@@ -64,39 +64,33 @@ body {
 ========================= */
 
 body::before {
+    contain: strict;
     content: "";
-
     position: fixed;
-
     inset: 0;
-
     pointer-events: none;
 
+    /* Raised alpha from 0.035 to 0.15 for actual visibility */
     background-image:
         linear-gradient(
-            rgba(255, 255, 255, 0.035) 1px,
+            rgba(255, 255, 255, 0.15) 1px,
             transparent 1px
         ),
         linear-gradient(
             90deg,
-            rgba(255, 255, 255, 0.035) 1px,
+            rgba(255, 255, 255, 0.15) 1px,
             transparent 1px
         );
 
     background-size: 70px 70px;
 
-    mask-image:
-        linear-gradient(
-            to bottom,
-            black,
-            transparent 85%
-        );
+    /* Added -webkit prefix for Safari/Chrome support */
+    -webkit-mask-image: linear-gradient(to bottom, black 0%, transparent 85%);
+    mask-image: linear-gradient(to bottom, black 0%, transparent 85%);
 
-    opacity: 0.45;
-
-    z-index: -2;
+    opacity: 0.8;
+    z-index: 0; /* Ensures it stays on top of body bg, but keep lower than main content */
 }
-
 /* =========================
    BACKGROUND ORBS
 ========================= */
@@ -114,11 +108,13 @@ body::before {
 }
 
 .orb {
+    will-change: transform;
+    transform: translate3d(0, 0, 0);
     position: absolute;
 
     border-radius: 50%;
 
-    filter: blur(110px);
+    filter: blur(70px);
 
     opacity: 0.45;
 
@@ -194,8 +190,8 @@ body::before {
 .cursor-glow {
     position: fixed;
 
-    width: 650px;
-    height: 650px;
+    width: 520px;
+    height: 520px;
 
     border-radius: 50%;
 
@@ -208,17 +204,17 @@ body::before {
         );
 
     transform:
-        translate(-50%, -50%);
+        translate3d(-50%, -50%, 0);
 
     pointer-events: none;
 
-    filter: blur(15px);
+    filter: blur(8px);
 
     z-index: 0;
 
-    transition:
-        left 0.08s linear,
-        top 0.08s linear;
+    transition: none;
+    will-change: transform;
+    contain: strict;
 }
 
 /* =========================
@@ -227,7 +223,7 @@ body::before {
 
 .container {
     width: 100%;
-    min-height: 100vh;
+    min-height: 50vh;
 
     display: flex;
 
@@ -248,7 +244,9 @@ body::before {
 ========================= */
 
 .glass-card {
-    width: min(760px, 100%);
+    contain: paint;
+    transform: translateZ(0);
+    width: min(1200px, 800%);
 
     padding: 58px;
 
@@ -270,12 +268,12 @@ body::before {
         rgba(255, 255, 255, 0.14);
 
     backdrop-filter:
-        blur(35px)
-        saturate(180%);
+        blur(18px)
+        saturate(150%);
 
     -webkit-backdrop-filter:
-        blur(35px)
-        saturate(180%);
+        blur(18px)
+        saturate(150%);
 
     box-shadow:
         0 40px 120px
@@ -333,7 +331,7 @@ body::before {
         rgba(89, 81, 255, 0.3);
 
     filter:
-        blur(80px);
+        blur(45px);
 
     pointer-events: none;
 }
@@ -508,13 +506,14 @@ h1 {
         sans-serif;
 
     font-size:
-        clamp(48px, 8vw, 82px);
+        clamp(30px, 10vw, 90px);
 
     line-height: 0.92;
 
-    letter-spacing: -4px;
+    letter-spacing: 1px;
+    
 
-    font-weight: 700;
+    font-weight: 800;
 
     margin-bottom: 24px;
 
@@ -553,7 +552,7 @@ h1 span {
 
     animation:
         gradientMove
-        6s
+        10s
         linear
         infinite;
 }
@@ -620,7 +619,7 @@ h1 span {
         0 1px 2px
         rgba(0, 0, 0, 0.4);
 
-    transition: 0.3s;
+    transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
 }
 
 .input-wrapper:hover {
@@ -723,6 +722,7 @@ input::placeholder {
 ========================= */
 
 .convert-button {
+    will-change: transform;
     height: 72px;
 
     border:
@@ -772,11 +772,11 @@ input::placeholder {
 
     overflow: hidden;
 
-    transition: 0.3s;
+    transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
 
     animation:
         buttonGradient
-        8s
+        12s
         linear
         infinite;
 }
@@ -851,7 +851,7 @@ input::placeholder {
 .button-icon {
     font-size: 23px;
 
-    transition: 0.3s;
+    transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
 }
 
 .convert-button:hover .button-icon {
@@ -978,6 +978,8 @@ input::placeholder {
     }
 
     .glass-card {
+    contain: paint;
+    transform: translateZ(0);
         padding: 38px 22px;
 
         border-radius: 28px;
@@ -1003,6 +1005,7 @@ input::placeholder {
 
     .input-wrapper,
     .convert-button {
+    will-change: transform;
         height: 64px;
     }
 
@@ -1022,5 +1025,91 @@ input::placeholder {
     *::after {
         animation: none !important;
         transition: none !important;
+    }
+}
+
+/* =========================
+   PERFORMANCE OPTIMIZATION
+========================= */
+
+@media (max-width: 900px) {
+    .orb {
+        filter: blur(55px);
+    }
+
+    .glass-card {
+        backdrop-filter: blur(14px) saturate(140%);
+        -webkit-backdrop-filter: blur(14px) saturate(140%);
+    }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .cursor-glow {
+        will-change: transform;
+    }
+}
+
+/* Avoid expensive backdrop-filter on browsers that do not support it */
+@supports not ((backdrop-filter: blur(1px))) {
+    .glass-card {
+        background: rgba(18, 18, 30, 0.92);
+    }
+}
+
+
+/* =========================
+   BUTTER-SMOOTH RENDERING
+   ========================= */
+
+/* Keep animated/composited elements on their own rendering layer. */
+.orb,
+.cursor-glow,
+.convert-button {
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
+
+/* Only animate transform/opacity where possible. */
+.logo-icon,
+.badge::before,
+.button-icon,
+.clear-button,
+.feature {
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
+
+/* Avoid unnecessary text rasterization work during animations. */
+h1 span {
+    will-change: background-position;
+}
+
+/* Reduce expensive hover work on touch devices. */
+@media (hover: none) {
+    .convert-button:hover,
+    .feature:hover,
+    .clear-button:hover,
+    .convert-button:hover::before {
+        transform: none;
+    }
+}
+
+/* Lower rendering cost on smaller displays. */
+@media (max-width: 650px) {
+    .orb {
+        filter: blur(45px);
+    }
+
+    .glass-card {
+        backdrop-filter: blur(10px) saturate(135%);
+        -webkit-backdrop-filter: blur(10px) saturate(135%);
+    }
+
+    h1 span {
+        animation-duration: 14s;
+    }
+
+    .convert-button {
+        animation-duration: 16s;
     }
 }
