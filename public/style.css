@@ -1,0 +1,1026 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap");
+
+/* =========================
+   RESET
+========================= */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --bg: #05050a;
+    --text: #ffffff;
+    --muted: #9292a5;
+
+    --purple: #8b5cff;
+    --blue: #31b8ff;
+    --cyan: #42f5e9;
+}
+
+html {
+    background: var(--bg);
+}
+
+
+
+body {
+    min-height: 100vh;
+
+    font-family:
+        "Inter",
+        system-ui,
+        sans-serif;
+
+    background:
+        radial-gradient(
+            circle at 50% -20%,
+            rgba(101, 72, 255, 0.24),
+            transparent 40%
+        ),
+        radial-gradient(
+            circle at 0% 100%,
+            rgba(0, 194, 255, 0.14),
+            transparent 42%
+        ),
+        radial-gradient(
+            circle at 100% 100%,
+            rgba(255, 57, 180, 0.12),
+            transparent 38%
+        ),
+        var(--bg);
+
+    color: var(--text);
+
+    overflow-x: hidden;
+
+    position: relative;
+}
+
+/* =========================
+   FUTURISTIC GRID
+========================= */
+
+body::before {
+    content: "";
+
+    position: fixed;
+
+    inset: 0;
+
+    pointer-events: none;
+
+    background-image:
+        linear-gradient(
+            rgba(255, 255, 255, 0.035) 1px,
+            transparent 1px
+        ),
+        linear-gradient(
+            90deg,
+            rgba(255, 255, 255, 0.035) 1px,
+            transparent 1px
+        );
+
+    background-size: 70px 70px;
+
+    mask-image:
+        linear-gradient(
+            to bottom,
+            black,
+            transparent 85%
+        );
+
+    opacity: 0.45;
+
+    z-index: -2;
+}
+
+/* =========================
+   BACKGROUND ORBS
+========================= */
+
+.background {
+    position: fixed;
+
+    inset: 0;
+
+    overflow: hidden;
+
+    pointer-events: none;
+
+    z-index: -1;
+}
+
+.orb {
+    position: absolute;
+
+    border-radius: 50%;
+
+    filter: blur(110px);
+
+    opacity: 0.45;
+
+    animation:
+        orbFloat
+        14s
+        infinite
+        alternate
+        ease-in-out;
+}
+
+.orb-1 {
+    width: 600px;
+    height: 600px;
+
+    background: #704cff;
+
+    top: -250px;
+    left: -200px;
+}
+
+.orb-2 {
+    width: 550px;
+    height: 550px;
+
+    background: #00b7ff;
+
+    bottom: -250px;
+    right: -180px;
+
+    animation-delay: -5s;
+}
+
+.orb-3 {
+    width: 400px;
+    height: 400px;
+
+    background: #ff42bd;
+
+    top: 35%;
+    left: 45%;
+
+    opacity: 0.16;
+
+    animation-delay: -8s;
+}
+
+@keyframes orbFloat {
+
+    0% {
+        transform:
+            translate3d(0, 0, 0)
+            scale(1);
+    }
+
+    50% {
+        transform:
+            translate3d(100px, 70px, 0)
+            scale(1.15);
+    }
+
+    100% {
+        transform:
+            translate3d(-40px, 120px, 0)
+            scale(0.95);
+    }
+}
+
+/* =========================
+   MOUSE FOLLOWING GLOW
+========================= */
+
+.cursor-glow {
+    position: fixed;
+
+    width: 650px;
+    height: 650px;
+
+    border-radius: 50%;
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(111, 91, 255, 0.15),
+            rgba(0, 190, 255, 0.05) 35%,
+            transparent 70%
+        );
+
+    transform:
+        translate(-50%, -50%);
+
+    pointer-events: none;
+
+    filter: blur(15px);
+
+    z-index: 0;
+
+    transition:
+        left 0.08s linear,
+        top 0.08s linear;
+}
+
+/* =========================
+   MAIN CONTAINER
+========================= */
+
+.container {
+    width: 100%;
+    min-height: 100vh;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+    justify-content: center;
+
+    padding: 40px 24px;
+
+    position: relative;
+
+    z-index: 1;
+}
+
+/* =========================
+   LIQUID GLASS CARD
+========================= */
+
+.glass-card {
+    width: min(760px, 100%);
+
+    padding: 58px;
+
+    border-radius: 36px;
+
+    position: relative;
+
+    overflow: hidden;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255, 255, 255, 0.11),
+            rgba(255, 255, 255, 0.025)
+        );
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.14);
+
+    backdrop-filter:
+        blur(35px)
+        saturate(180%);
+
+    -webkit-backdrop-filter:
+        blur(35px)
+        saturate(180%);
+
+    box-shadow:
+        0 40px 120px
+        rgba(0, 0, 0, 0.65),
+
+        inset
+        0 1px 0
+        rgba(255, 255, 255, 0.16);
+
+    animation:
+        cardEntrance
+        0.8s
+        cubic-bezier(0.16, 1, 0.3, 1)
+        both;
+}
+
+.glass-card::before {
+    content: "";
+
+    position: absolute;
+
+    width: 500px;
+    height: 500px;
+
+    top: -350px;
+    right: -180px;
+
+    border-radius: 50%;
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(255, 255, 255, 0.2),
+            transparent 68%
+        );
+
+    pointer-events: none;
+}
+
+.glass-card::after {
+    content: "";
+
+    position: absolute;
+
+    width: 350px;
+    height: 120px;
+
+    bottom: -100px;
+    left: 50%;
+
+    transform:
+        translateX(-50%);
+
+    background:
+        rgba(89, 81, 255, 0.3);
+
+    filter:
+        blur(80px);
+
+    pointer-events: none;
+}
+
+@keyframes cardEntrance {
+
+    from {
+        opacity: 0;
+
+        transform:
+            translateY(35px)
+            scale(0.97);
+    }
+
+    to {
+        opacity: 1;
+
+        transform:
+            translateY(0)
+            scale(1);
+    }
+}
+
+/* =========================
+   LOGO
+========================= */
+
+.logo {
+    display: flex;
+
+    align-items: center;
+
+    gap: 13px;
+
+    font-size: 12px;
+
+    font-weight: 900;
+
+    letter-spacing: 4px;
+
+    margin-bottom: 58px;
+
+    color:
+        rgba(255, 255, 255, 0.92);
+
+    position: relative;
+
+    z-index: 2;
+}
+
+.logo-icon {
+    width: 42px;
+    height: 42px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 14px;
+
+    font-size: 21px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #9b7cff,
+            #4a9cff,
+            #39f4e7
+        );
+
+    box-shadow:
+        0 0 35px
+        rgba(102, 99, 255, 0.55);
+
+    position: relative;
+}
+
+.logo-icon::after {
+    content: "";
+
+    position: absolute;
+
+    inset: 1px;
+
+    border-radius: inherit;
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.3);
+}
+
+/* =========================
+   HERO
+========================= */
+
+.hero {
+    text-align: center;
+
+    margin-bottom: 44px;
+
+    position: relative;
+
+    z-index: 2;
+}
+
+.badge {
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    padding: 9px 16px;
+
+    border-radius: 999px;
+
+    background:
+        rgba(255, 255, 255, 0.045);
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.11);
+
+    color: #b7b4c8;
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+    letter-spacing: 2px;
+
+    margin-bottom: 25px;
+}
+
+.badge::before {
+    content: "";
+
+    width: 6px;
+    height: 6px;
+
+    border-radius: 50%;
+
+    background: #57f2b0;
+
+    box-shadow:
+        0 0 12px #57f2b0;
+
+    animation:
+        pulse
+        2s
+        infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.5);
+        opacity: 0.5;
+    }
+}
+
+h1 {
+    font-family:
+        "Space Grotesk",
+        sans-serif;
+
+    font-size:
+        clamp(48px, 8vw, 82px);
+
+    line-height: 0.92;
+
+    letter-spacing: -4px;
+
+    font-weight: 700;
+
+    margin-bottom: 24px;
+
+    text-shadow:
+        0 10px 50px
+        rgba(0, 0, 0, 0.45);
+}
+
+h5{
+
+    color: red;
+    text-shadow:
+        0 10px 50px
+        rgba(0, 0, 0, 0.45);
+}
+
+h1 span {
+    display: block;
+
+    background:
+        linear-gradient(
+            100deg,
+            #ffffff 5%,
+            #b6a7ff 40%,
+            #5ccaff 70%,
+            #7effe6 100%
+        );
+
+    background-size: 200% auto;
+
+    -webkit-background-clip: text;
+
+    background-clip: text;
+
+    color: transparent;
+
+    animation:
+        gradientMove
+        6s
+        linear
+        infinite;
+}
+
+@keyframes gradientMove {
+
+    from {
+        background-position: 0% center;
+    }
+
+    to {
+        background-position: 200% center;
+    }
+}
+
+.hero p {
+    max-width: 530px;
+
+    margin: auto;
+
+    color: var(--muted);
+
+    line-height: 1.8;
+
+    font-size: 14px;
+}
+
+/* =========================
+   CONVERTER
+========================= */
+
+.converter {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 15px;
+
+    position: relative;
+
+    z-index: 2;
+}
+
+.input-wrapper {
+    height: 72px;
+
+    display: flex;
+
+    align-items: center;
+
+    padding: 0 12px 0 22px;
+
+    border-radius: 20px;
+
+    background:
+        rgba(0, 0, 0, 0.24);
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.1);
+
+    box-shadow:
+        inset
+        0 1px 2px
+        rgba(0, 0, 0, 0.4);
+
+    transition: 0.3s;
+}
+
+.input-wrapper:hover {
+    border-color:
+        rgba(255, 255, 255, 0.2);
+}
+
+.input-wrapper:focus-within {
+    border-color:
+        rgba(126, 116, 255, 0.9);
+
+    background:
+        rgba(20, 18, 45, 0.45);
+
+    box-shadow:
+        0 0 0 4px
+        rgba(117, 93, 255, 0.12),
+
+        0 0 45px
+        rgba(90, 90, 255, 0.15);
+}
+
+.link-icon {
+    margin-right: 14px;
+
+    opacity: 0.7;
+
+    transition: 0.25s;
+}
+
+.input-wrapper:focus-within .link-icon {
+    opacity: 1;
+
+    transform:
+        rotate(-8deg)
+        scale(1.1);
+}
+
+input {
+    flex: 1;
+
+    height: 100%;
+
+    min-width: 0;
+
+    background: transparent;
+
+    border: none;
+
+    outline: none;
+
+    color: white;
+
+    font-size: 15px;
+}
+
+input::placeholder {
+    color: #666679;
+}
+
+.clear-button {
+    width: 42px;
+    height: 42px;
+
+    border: none;
+
+    border-radius: 13px;
+
+    background:
+        rgba(255, 255, 255, 0.055);
+
+    color: white;
+
+    font-size: 23px;
+
+    cursor: pointer;
+
+    opacity: 0;
+
+    pointer-events: none;
+
+    transition: 0.25s;
+}
+
+.clear-button.visible {
+    opacity: 1;
+
+    pointer-events: auto;
+}
+
+.clear-button:hover {
+    background:
+        rgba(255, 80, 120, 0.15);
+
+    transform: rotate(90deg);
+}
+
+/* =========================
+   CONVERT BUTTON
+========================= */
+
+.convert-button {
+    height: 72px;
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.15);
+
+    border-radius: 20px;
+
+    cursor: pointer;
+
+    color: white;
+
+    font-weight: 800;
+
+    font-size: 13px;
+
+    letter-spacing: 2px;
+
+    background:
+        linear-gradient(
+            110deg,
+            #704cff,
+            #4c7dff,
+            #00c9f5,
+            #704cff
+        );
+
+    background-size: 300% 100%;
+
+    box-shadow:
+        0 18px 45px
+        rgba(64, 95, 255, 0.3),
+
+        inset
+        0 1px 0
+        rgba(255, 255, 255, 0.25);
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 16px;
+
+    position: relative;
+
+    overflow: hidden;
+
+    transition: 0.3s;
+
+    animation:
+        buttonGradient
+        8s
+        linear
+        infinite;
+}
+
+@keyframes buttonGradient {
+
+    from {
+        background-position: 0% center;
+    }
+
+    to {
+        background-position: 300% center;
+    }
+}
+
+.convert-button::before {
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+
+    left: -120%;
+
+    width: 70%;
+    height: 100%;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(255, 255, 255, 0.3),
+            transparent
+        );
+
+    transform: skewX(-25deg);
+
+    transition: 0.8s;
+}
+
+.convert-button:hover::before {
+    left: 150%;
+}
+
+.convert-button:hover {
+    transform:
+        translateY(-4px)
+        scale(1.01);
+
+    box-shadow:
+        0 28px 70px
+        rgba(66, 115, 255, 0.5),
+
+        0 0 50px
+        rgba(0, 212, 255, 0.16);
+}
+
+.convert-button:active {
+    transform:
+        translateY(0)
+        scale(0.98);
+}
+
+.convert-button:disabled {
+    opacity: 0.6;
+
+    cursor: not-allowed;
+
+    transform: none;
+}
+
+.button-icon {
+    font-size: 23px;
+
+    transition: 0.3s;
+}
+
+.convert-button:hover .button-icon {
+    transform:
+        translateX(7px);
+}
+
+/* =========================
+   STATUS
+========================= */
+
+.status {
+    margin-top: 24px;
+
+    min-height: 25px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    text-align: center;
+
+    color: var(--muted);
+
+    font-size: 13px;
+
+    position: relative;
+
+    z-index: 2;
+}
+
+.status.success {
+    color: #57f2b0;
+}
+
+.status.error {
+    color: #ff7c91;
+}
+
+/* =========================
+   FEATURES
+========================= */
+
+.features {
+    display: flex;
+
+    justify-content: center;
+
+    flex-wrap: wrap;
+
+    gap: 12px;
+
+    margin-top: 38px;
+
+    position: relative;
+
+    z-index: 2;
+}
+
+.feature {
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    padding: 8px 13px;
+
+    border-radius: 999px;
+
+    background:
+        rgba(255, 255, 255, 0.035);
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.06);
+
+    color: #9898aa;
+
+    font-size: 11px;
+
+    transition: 0.25s;
+}
+
+.feature:hover {
+    color: white;
+
+    background:
+        rgba(255, 255, 255, 0.07);
+
+    border-color:
+        rgba(255, 255, 255, 0.14);
+
+    transform:
+        translateY(-2px);
+}
+
+/* =========================
+   FOOTER
+========================= */
+
+.footer {
+    margin-top: 25px;
+
+    color: #626276;
+
+    font-size: 10px;
+
+    letter-spacing: 0.5px;
+
+    text-align: center;
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 650px) {
+
+    .container {
+        padding: 20px 16px;
+    }
+
+    .glass-card {
+        padding: 38px 22px;
+
+        border-radius: 28px;
+    }
+
+    .logo {
+        margin-bottom: 45px;
+    }
+
+    h1 {
+        letter-spacing: -2.5px;
+    }
+
+    .orb-1,
+    .orb-2 {
+        width: 400px;
+        height: 400px;
+    }
+
+    .cursor-glow {
+        display: none;
+    }
+
+    .input-wrapper,
+    .convert-button {
+        height: 64px;
+    }
+
+    .features {
+        gap: 8px;
+    }
+}
+
+/* =========================
+   REDUCE MOTION
+========================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation: none !important;
+        transition: none !important;
+    }
+}
