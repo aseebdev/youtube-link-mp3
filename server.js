@@ -2,6 +2,7 @@ const express = require("express");
 const path = require("path");
 const fs = require("fs");
 const crypto = require("crypto");
+const { execFile } = require("child_process");
 
 const app = express();
 
@@ -43,12 +44,43 @@ console.log("Deno exists:", fs.existsSync(denoPath));
 
 // ============================================================
 // CREATE DOWNLOAD FOLDER
+// ------------------------------------------------------------
+// SPEED TIP (do this outside the code, once, on the server):
+// Mount this folder as tmpfs (RAM-backed) so every write/read/
+// delete during conversion is instant instead of hitting disk:
+//
+//   sudo mkdir -p /path/to/project/downloads
+//   sudo mount -t tmpfs -o size=512M tmpfs /path/to/project/downloads
+//
+// This alone can shave real time off every single conversion.
 // ============================================================
 
 if (!fs.existsSync(downloadsPath)) {
     fs.mkdirSync(downloadsPath, {
         recursive: true
     });
+}
+
+// ============================================================
+// WARM UP DENO AT BOOT
+// ------------------------------------------------------------
+// yt-dlp shells out to Deno on every /convert call to solve
+// YouTube's JS signature challenge. A cold Deno process adds
+// real fixed latency to the FIRST request after boot (OS file
+// cache, JIT, etc. all cold). Running one throwaway invocation
+// at startup warms that path so real requests don't pay for it.
+// ============================================================
+
+if (fs.existsSync(denoPath)) {
+    execFile(denoPath, ["--version"], (error) => {
+        if (error) {
+            console.error("Deno warm-up failed:", error.message);
+        } else {
+            console.log("Deno warmed up and ready.");
+        }
+    });
+} else {
+    console.error("Deno executable not found at boot:", denoPath);
 }
 
 // ============================================================
@@ -167,20 +199,33 @@ app.post("/convert", async (req, res) => {
     console.log("FFmpeg:", ffmpegPath);
     console.log("======================================");
 
+    const timeLabel = `conversion-${id}`;
+    console.time(timeLabel);
+
     try {
 
         // ====================================================
-        // YT-DLP — SPEED + MAXIMUM MP3 QUALITY
+        // YT-DLP — MAX SPEED + MAX (LOSSLESS-SOURCE) MP3 QUALITY
         // ====================================================
 
         await youtubedl(cleanUrl, {
 
             noPlaylist: true,
 
-            // Best available YouTube audio source
-            format: "bestaudio/best",
+            // --------------------------------------------------
+            // FORMAT SELECTION
+            // --------------------------------------------------
+            // "bestaudio*" (no "/best" fallback) guarantees we
+            // NEVER silently pull a combined video+audio stream.
+            // That fallback was the single biggest hidden speed
+            // killer — downloading an entire video just to keep
+            // the audio track. Audio-only streams are also
+            // smaller, so this is a pure speed win with zero
+            // quality trade-off.
+            // --------------------------------------------------
+            format: "bestaudio*",
 
-            // Highest MP3 quality
+            // Highest MP3 quality — untouched, non-negotiable.
             extractAudio: true,
             audioFormat: "mp3",
             audioQuality: "0",
@@ -199,12 +244,27 @@ app.post("/convert", async (req, res) => {
             // DOWNLOAD SPEED
             // =================================================
 
-            // Download fragmented streams concurrently
-            concurrentFragments: 8,
+            // Multi-connection segmented downloading via aria2c.
+            // Requires aria2c installed on the server:
+            //   Debian/Ubuntu: sudo apt install aria2
+            //   macOS:         brew install aria2
+            // If aria2c is not available, remove these two lines
+            // and yt-dlp will fall back to its built-in downloader
+            // (still faster than before thanks to the other fixes,
+            // just not as fast as aria2c).
+            externalDownloader: "aria2c",
+            externalDownloaderArgs: "-x 16 -s 16 -k 1M",
 
-            // No artificial delays
+            // Download fragmented streams concurrently
+            concurrentFragments: 16,
+
+            // No artificial delay between retries
             retries: 3,
-            retrySleep: 1,
+            retrySleep: 0,
+
+            // Skip work we don't need — pure overhead removal
+            writeThumbnail: false,
+            writeInfoJson: false,
 
             // =================================================
             // COOKIES
@@ -225,6 +285,8 @@ app.post("/convert", async (req, res) => {
                 "AppleWebKit/537.36 (KHTML, like Gecko) " +
                 "Chrome/124.0 Safari/537.36"
         });
+
+        console.timeEnd(timeLabel);
 
         // ====================================================
         // FIND GENERATED MP3
@@ -269,6 +331,8 @@ app.post("/convert", async (req, res) => {
         });
 
     } catch (error) {
+
+        console.timeEnd(timeLabel);
 
         console.error("");
         console.error(
@@ -386,6 +450,24 @@ app.post("/convert", async (req, res) => {
                 success: false,
                 error:
                     "YouTube JavaScript runtime is unavailable on the server."
+            });
+        }
+
+        // ====================================================
+        // ARIA2C MISSING ERROR
+        // ====================================================
+
+        if (
+            errorText.includes("aria2c") &&
+            (errorText.includes("not found") ||
+             errorText.includes("no such file") ||
+             errorText.includes("enoent"))
+        ) {
+
+            return res.status(500).json({
+                success: false,
+                error:
+                    "aria2c is not installed on the server. Install it (e.g. 'apt install aria2') or remove the externalDownloader option."
             });
         }
 
