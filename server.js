@@ -1,451 +1,588 @@
-const express = require("express");
-const path = require("path");
-const fs = require("fs");
-const fsp = require("fs/promises");
-const crypto = require("crypto");
-const { execFile } = require("child_process");
-const util = require("util");
+    const express = require("express");
+    const path = require("path");
+    const fs = require("fs");
+    const crypto = require("crypto");
 
-const execFileAsync = util.promisify(execFile);
+    const app = express();
 
-const app = express();
+    const PORT = process.env.PORT || 3000;
 
-const PORT = process.env.PORT || 3000;
-const publicPath = path.join(__dirname, "public");
-const downloadsPath = path.join(__dirname, "downloads");
+    const publicPath = path.join(__dirname, "public");
+    const downloadsPath = path.join(__dirname, "downloads");
 
-// ============================================================
-// PACKAGES
-// ============================================================
+    // ============================================================
+    // PACKAGES
+    // ============================================================
 
-const youtubedl = require("youtube-dl-exec");
-const ffmpegPath = require("@ffmpeg-installer/ffmpeg").path;
+    const youtubedl = require("youtube-dl-exec");
+    const ffmpegPath = require("@ffmpeg-installer/ffmpeg").path;
 
-// ============================================================
-// CROSS-PLATFORM DENO PATH
-// ============================================================
+    // ============================================================
+    // CROSS-PLATFORM DENO PATH
+    // Windows:
+    //   node_modules/deno/deno.exe
+    //
+    // Render Linux:
+    //   node_modules/deno/deno
+    // ============================================================
 
-const denoExecutable = process.platform === "win32" ? "deno.exe" : "deno";
+    const denoExecutable =
+        process.platform === "win32"
+            ? "deno.exe"
+            : "deno";
 
-const denoPath = path.join(
-    __dirname,
-    "node_modules",
-    "deno",
-    denoExecutable
-);
+    const denoPath = path.join(
+        __dirname,
+        "node_modules",
+        "deno",
+        denoExecutable
+    );
 
-// ============================================================
-// HELPERS
-// ============================================================
-
-function fileExists(filePath) {
-    return fsp
-        .access(filePath, fs.constants.F_OK)
-        .then(() => true)
-        .catch(() => false);
-}
-
-async function ensureDownloadsFolder() {
-    await fsp.mkdir(downloadsPath, { recursive: true });
-}
-
-async function cleanupFilesByPrefix(prefix) {
-    try {
-        const files = await fsp.readdir(downloadsPath);
-
-        await Promise.allSettled(
-            files
-                .filter((file) => file.startsWith(prefix))
-                .map((file) =>
-                    fsp.unlink(path.join(downloadsPath, file))
-                )
-        );
-    } catch {
-        // Ignore cleanup errors
-    }
-}
-
-function isYouTubeHost(hostname) {
-    const allowedHosts = new Set([
-        "youtube.com",
-        "www.youtube.com",
-        "m.youtube.com",
-        "music.youtube.com",
-        "youtu.be"
-    ]);
-
-    return allowedHosts.has(hostname.toLowerCase());
-}
-
-function getSafeErrorText(error) {
-    return String(error?.stderr || error?.message || "").toLowerCase();
-}
-
-function logErrorBlock(error) {
-    console.error("");
-    console.error("========== CONVERSION ERROR ==========");
-    console.error("Message:", error?.message || "Unknown error");
-    console.error("Name:", error?.name || "Unknown");
-    console.error("Code:", error?.code || "Unknown");
-
-    if (error?.stderr) {
-        console.error("stderr:", error.stderr);
-    }
-
-    if (error?.stdout) {
-        console.error("stdout:", error.stdout);
-    }
-
-    console.error("======================================");
-}
-
-function buildDownloadHeaders(filename) {
-    return {
-        "Content-Type": "audio/mpeg",
-        "Content-Disposition": `attachment; filename="RR-audioFlux.mp3"`,
-        "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
-        "Pragma": "no-cache",
-        "Expires": "0",
-        "X-Content-Type-Options": "nosniff"
-    };
-}
-
-// ============================================================
-// STARTUP
-// ============================================================
-
-app.disable("x-powered-by");
-
-app.use(
-    express.json({
-        limit: "10kb"
-    })
-);
-
-app.use(
-    express.static(publicPath, {
-        etag: true,
-        maxAge: "1h"
-    })
-);
-
-// ============================================================
-// BOOT PREP
-// ============================================================
-
-async function boot() {
-    await ensureDownloadsFolder();
+    // ============================================================
+    // VERIFY DENO
+    // ============================================================
 
     console.log("Platform:", process.platform);
     console.log("Architecture:", process.arch);
     console.log("Deno path:", denoPath);
     console.log("Deno exists:", fs.existsSync(denoPath));
-    console.log("FFmpeg path:", ffmpegPath);
-    console.log("Downloads path:", downloadsPath);
 
-    if (fs.existsSync(denoPath)) {
+    // ============================================================
+    // CREATE TEMPORARY DOWNLOAD FOLDER
+    // ============================================================
+
+    if (!fs.existsSync(downloadsPath)) {
+        fs.mkdirSync(downloadsPath, {
+            recursive: true
+        });
+    }
+
+    // ============================================================
+    // MIDDLEWARE
+    // ============================================================
+
+    app.disable("x-powered-by");
+
+    app.use(
+        express.json({
+            limit: "10kb"
+        })
+    );
+
+    app.use(
+        express.static(publicPath, {
+            etag: true
+        })
+    );
+
+    // ============================================================
+    // CONVERT YOUTUBE VIDEO TO MP3
+    // ============================================================
+
+    app.post("/convert", async (req, res) => {
+
+        const { url } = req.body;
+
+        // --------------------------------------------------------
+        // Validate input
+        // --------------------------------------------------------
+
+        if (!url || typeof url !== "string") {
+            return res.status(400).json({
+                success: false,
+                error: "Please provide a YouTube URL."
+            });
+        }
+
+        const cleanUrl = url.trim();
+
+        // --------------------------------------------------------
+        // Validate URL
+        // --------------------------------------------------------
+
+        let parsedUrl;
+
         try {
-            const result = await execFileAsync(denoPath, ["--version"]);
-            console.log("Deno warmed up and ready.");
-            if (result?.stdout) {
-                console.log(result.stdout.trim());
+            parsedUrl = new URL(cleanUrl);
+        } catch {
+            return res.status(400).json({
+                success: false,
+                error: "Invalid URL."
+            });
+        }
+
+        // --------------------------------------------------------
+        // Allowed YouTube hosts
+        // --------------------------------------------------------
+
+        const allowedHosts = [
+            "youtube.com",
+            "www.youtube.com",
+            "m.youtube.com",
+            "music.youtube.com",
+            "youtu.be"
+        ];
+
+        const hostname =
+            parsedUrl.hostname.toLowerCase();
+
+        if (!allowedHosts.includes(hostname)) {
+            return res.status(400).json({
+                success: false,
+                error: "Only YouTube URLs are supported."
+            });
+        }
+
+        // --------------------------------------------------------
+        // Check Deno before starting conversion
+        // --------------------------------------------------------
+
+        if (!fs.existsSync(denoPath)) {
+
+            console.error(
+                "Deno executable not found:",
+                denoPath
+            );
+
+            return res.status(500).json({
+                success: false,
+                error:
+                    "Server JavaScript runtime is not available."
+            });
+        }
+
+        // --------------------------------------------------------
+        // Unique temporary file ID
+        // --------------------------------------------------------
+
+        const id = crypto.randomUUID();
+
+        const outputTemplate = path.join(
+            downloadsPath,
+            id + ".%(ext)s"
+        );
+
+        console.log("");
+        console.log("======================================");
+        console.log("Starting conversion");
+        console.log("ID:", id);
+        console.log("URL:", cleanUrl);
+        console.log("Platform:", process.platform);
+        console.log("Deno:", denoPath);
+        console.log("Deno exists:", fs.existsSync(denoPath));
+        console.log("FFmpeg:", ffmpegPath);
+        console.log("======================================");
+
+        try {
+
+            // ====================================================
+            // YT-DLP
+            // ====================================================
+            // await youtubedl(cleanUrl, {
+            //     noPlaylist: true,
+            //     extractAudio: true,
+            //     audioFormat: "mp3",
+            //     audioQuality: "0",   // best quality (100%)
+            //     jsRuntimes: `deno:${denoPath}`,
+            //     ffmpegLocation: path.dirname(ffmpegPath),
+            //     output: outputTemplate,
+
+            //     // Use cookies for authentication
+            //     cookies: path.join(__dirname, "cookies.txt"),
+
+            //     // Realistic user agent
+            //     userAgent:
+            //         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) " +
+            //         "AppleWebKit/537.36 (KHTML, like Gecko) " +
+            //         "Chrome/124.0 Safari/537.36",
+
+            //     // Gentle pacing to reduce rate‑limit errors
+            //     extractorArgs: "youtube:player_client=tv,web_safari",
+            //     sleepRequests: 2,
+            //     sleepInterval: 5,
+            //     maxSleepInterval: 10,
+
+            //     // Retry logic for temporary hiccups
+            //     retries: 3,
+            //     retrySleep: 5,
+            // });
+            
+            await new Promise(resolve => setTimeout(resolve, Math.random() * 3000 + 2000));
+
+            await youtubedl(cleanUrl, {
+                noPlaylist: true,
+                extractAudio: true,
+                audioFormat: "mp3",
+                audioQuality: "0",
+                jsRuntimes: `deno:${denoPath}`,
+                ffmpegLocation: path.dirname(ffmpegPath),
+                output: outputTemplate,
+
+                // === BOT BYPASS ===
+                extractorArgs: "youtube:player_client=tv,web_safari",
+                sleepRequests: 3,
+                sleepInterval: 8,
+                maxSleepInterval: 15,
+
+                // Use cookies only if valid Netscape format
+                // cookies: path.join(__dirname, "cookies.txt"), -- anthe istapettillee
+                cookies: path.join(__dirname, "cookies.txt"),
+
+
+
+                // Add a realistic user agent
+                userAgent:
+                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) " +
+                    "AppleWebKit/537.36 (KHTML, like Gecko) " +
+                    "Chrome/124.0 Safari/537.36",
+
+                // Retry logic for temporary blocks
+                retries: 3,
+                retrySleep: 10,
+            });
+
+
+
+            // ====================================================
+            // FIND GENERATED MP3
+            // ====================================================
+
+            const files =
+                fs.readdirSync(downloadsPath);
+
+            const mp3File =
+                files.find((file) => {
+                    return (
+                        file.startsWith(id) &&
+                        file
+                            .toLowerCase()
+                            .endsWith(".mp3")
+                    );
+                });
+
+            if (!mp3File) {
+
+                console.error(
+                    "MP3 file was not found."
+                );
+
+                return res.status(500).json({
+                    success: false,
+                    error:
+                        "Conversion finished, but the MP3 file was not found."
+                });
             }
+
+            console.log(
+                "SUCCESS:",
+                mp3File
+            );
+
+            // ====================================================
+            // RETURN DOWNLOAD URL
+            // ====================================================
+
+            return res.json({
+                success: true,
+                file:
+                    "/download/" +
+                    encodeURIComponent(mp3File)
+            });
+
         } catch (error) {
-            console.error("Deno warm-up failed:", error.message);
-        }
-    } else {
-        console.error("Deno executable not found at boot:", denoPath);
-    }
-}
 
-// ============================================================
-// CONVERT YOUTUBE VIDEO TO MP3
-// ============================================================
+            console.error("");
+            console.error(
+                "========== CONVERSION ERROR =========="
+            );
 
-app.post("/convert", async (req, res) => {
-    const { url } = req.body || {};
+            console.error(
+                "Message:",
+                error.message
+            );
 
-    if (!url || typeof url !== "string") {
-        return res.status(400).json({
-            success: false,
-            error: "Please provide a YouTube URL."
-        });
-    }
+            console.error(
+                "Name:",
+                error.name
+            );
 
-    const cleanUrl = url.trim();
+            console.error(
+                "Code:",
+                error.code
+            );
 
-    let parsedUrl;
-    try {
-        parsedUrl = new URL(cleanUrl);
-    } catch {
-        return res.status(400).json({
-            success: false,
-            error: "Invalid URL."
-        });
-    }
-
-    if (!isYouTubeHost(parsedUrl.hostname)) {
-        return res.status(400).json({
-            success: false,
-            error: "Only YouTube URLs are supported."
-        });
-    }
-
-    if (!fs.existsSync(denoPath)) {
-        console.error("Deno executable not found:", denoPath);
-
-        return res.status(500).json({
-            success: false,
-            error: "Server JavaScript runtime is not available."
-        });
-    }
-
-    const id = crypto.randomUUID();
-    const outputTemplate = path.join(downloadsPath, `${id}.%(ext)s`);
-    const mp3File = `${id}.mp3`;
-    const mp3Path = path.join(downloadsPath, mp3File);
-
-    console.log("");
-    console.log("======================================");
-    console.log("Starting conversion");
-    console.log("ID:", id);
-    console.log("URL:", cleanUrl);
-    console.log("Platform:", process.platform);
-    console.log("Deno:", denoPath);
-    console.log("Deno exists:", fs.existsSync(denoPath));
-    console.log("FFmpeg:", ffmpegPath);
-    console.log("Output:", mp3Path);
-    console.log("======================================");
-
-    const timeLabel = `conversion-${id}`;
-    console.time(timeLabel);
-
-    try {
-        await youtubedl(cleanUrl, {
-            noPlaylist: true,
-
-            // Reliable best-audio selection
-            format: "bestaudio/best",
-
-            // Best MP3 quality
-            extractAudio: true,
-            audioFormat: "mp3",
-            audioQuality: "0",
-
-            // Runtime for YouTube JS challenge solving
-            jsRuntimes: `deno:${denoPath}`,
-
-            // FFmpeg location
-            ffmpegLocation: path.dirname(ffmpegPath),
-
-            // Output
-            output: outputTemplate,
-
-            // Render-friendly performance tuning
-            concurrentFragments: 8,
-            bufferSize: "16K",
-            retries: 3,
-            retrySleep: 0,
-            socketTimeout: 30,
-
-            // Remove unnecessary extra work
-            writeThumbnail: false,
-            writeInfoJson: false,
-            writeDescription: false,
-            writeComments: false,
-            writeAllThumbnails: false,
-            noWarnings: true,
-            preferFreeFormats: false,
-
-            // Keep extraction path lean
-            noCheckCertificates: false,
-            windowsFilenames: false,
-            paths: downloadsPath,
-
-            // Cookies if available
-            cookies: path.join(__dirname, "cookies.txt"),
-
-            // UA
-            userAgent:
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) " +
-                "AppleWebKit/537.36 (KHTML, like Gecko) " +
-                "Chrome/124.0 Safari/537.36"
-        });
-
-        console.timeEnd(timeLabel);
-
-        const mp3Exists = await fileExists(mp3Path);
-
-        if (!mp3Exists) {
-            console.error("MP3 file was not found.");
-
-            return res.status(500).json({
-                success: false,
-                error: "Conversion finished, but the MP3 file was not found."
-            });
-        }
-
-        console.log("SUCCESS:", mp3File);
-
-        return res.json({
-            success: true,
-            file: "/download/" + encodeURIComponent(mp3File)
-        });
-    } catch (error) {
-        console.timeEnd(timeLabel);
-        logErrorBlock(error);
-        await cleanupFilesByPrefix(id);
-
-        const errorText = getSafeErrorText(error);
-
-        if (
-            errorText.includes("sign in to confirm") ||
-            errorText.includes("not a bot") ||
-            errorText.includes("confirm you're not a bot") ||
-            errorText.includes("video unavailable") ||
-            errorText.includes("requested format is not available")
-        ) {
-            return res.status(503).json({
-                success: false,
-                error: "YouTube is temporarily blocking this server. Please try again later."
-            });
-        }
-
-        if (
-            errorText.includes("javascript runtime") ||
-            errorText.includes("no supported javascript runtime") ||
-            errorText.includes("deno")
-        ) {
-            return res.status(500).json({
-                success: false,
-                error: "YouTube JavaScript runtime is unavailable on the server."
-            });
-        }
-
-        if (
-            errorText.includes("ffmpeg") ||
-            errorText.includes("ffprobe")
-        ) {
-            return res.status(500).json({
-                success: false,
-                error: "FFmpeg is unavailable on the server."
-            });
-        }
-
-        return res.status(500).json({
-            success: false,
-            error: "Unable to convert this video. Please try another YouTube URL."
-        });
-    }
-});
-
-// ============================================================
-// DOWNLOAD MP3
-// STREAM DIRECTLY TO USER
-// ============================================================
-
-app.get("/download/:filename", async (req, res) => {
-    const filename = path.basename(req.params.filename || "");
-    const filePath = path.join(downloadsPath, filename);
-
-    if (!filename.endsWith(".mp3") || filename.includes("..")) {
-        return res.status(400).send("Invalid file.");
-    }
-
-    const exists = await fileExists(filePath);
-
-    if (!exists) {
-        return res.status(404).send("File not found.");
-    }
-
-    console.log("Sending file:", filename);
-
-    try {
-        const stat = await fsp.stat(filePath);
-
-        res.set(buildDownloadHeaders(filename));
-        res.set("Content-Length", stat.size);
-
-        const stream = fs.createReadStream(filePath);
-
-        stream.on("error", async (error) => {
-            console.error("Stream error:", error.message);
-
-            if (!res.headersSent) {
-                res.status(500).send("Download failed.");
-            } else {
-                res.destroy(error);
+            if (error.stderr) {
+                console.error(
+                    "stderr:",
+                    error.stderr
+                );
             }
+
+            if (error.stdout) {
+                console.error(
+                    "stdout:",
+                    error.stdout
+                );
+            }
+
+            console.error(
+                "======================================"
+            );
+
+            // ====================================================
+            // CLEAN FAILED TEMP FILES
+            // ====================================================
 
             try {
-                if (await fileExists(filePath)) {
-                    await fsp.unlink(filePath);
-                    console.log("Temporary file deleted after stream error:", filename);
+
+                const files =
+                    fs.readdirSync(
+                        downloadsPath
+                    );
+
+                for (const file of files) {
+
+                    if (file.startsWith(id)) {
+
+                        try {
+
+                            fs.unlinkSync(
+                                path.join(
+                                    downloadsPath,
+                                    file
+                                )
+                            );
+
+                        } catch {
+                            // Ignore cleanup errors
+                        }
+                    }
                 }
-            } catch (deleteError) {
-                console.error("File cleanup failed:", deleteError.message);
-            }
-        });
 
-        res.on("finish", async () => {
-            try {
-                if (await fileExists(filePath)) {
-                    await fsp.unlink(filePath);
-                    console.log("Temporary file deleted:", filename);
-                }
-            } catch (deleteError) {
-                console.error("File cleanup failed:", deleteError.message);
+            } catch {
+                // Ignore cleanup errors
             }
-        });
 
-        stream.pipe(res);
-    } catch (error) {
-        console.error("Download error:", error.message);
+            // ====================================================
+            // YOUTUBE BOT ERROR
+            // ====================================================
 
-        try {
-            if (await fileExists(filePath)) {
-                await fsp.unlink(filePath);
-                console.log("Temporary file deleted after download failure:", filename);
+            const errorText =
+                (
+                    error.stderr ||
+                    error.message ||
+                    ""
+                ).toLowerCase();
+
+            if (
+                errorText.includes(
+                    "sign in to confirm"
+                ) ||
+                errorText.includes(
+                    "not a bot"
+                )
+            ) {
+
+                return res.status(503).json({
+                    success: false,
+                    error:
+                        "YouTube is temporarily blocking this server. Please try again later."
+                });
             }
-        } catch (deleteError) {
-            console.error("File cleanup failed:", deleteError.message);
+
+            // ====================================================
+            // JAVASCRIPT RUNTIME ERROR
+            // ====================================================
+
+            if (
+                errorText.includes(
+                    "javascript runtime"
+                ) ||
+                errorText.includes(
+                    "no supported javascript runtime"
+                )
+            ) {
+
+                return res.status(500).json({
+                    success: false,
+                    error:
+                        "YouTube JavaScript runtime is unavailable on the server."
+                });
+            }
+
+            // ====================================================
+            // GENERAL CONVERSION ERROR
+            // ====================================================
+
+            return res.status(500).json({
+                success: false,
+                error:
+                    "Unable to convert this video. Please try another YouTube URL."
+            });
         }
-
-        return res.status(500).send("Download failed.");
-    }
-});
-
-// ============================================================
-// HEALTH CHECK
-// ============================================================
-
-app.get("/health", (req, res) => {
-    res.json({
-        success: true,
-        status: "online"
     });
-});
 
-// ============================================================
-// START SERVER
-// ============================================================
+    // ============================================================
+    // DOWNLOAD MP3
+    // SEND TO USER THEN DELETE FROM SERVER
+    // ============================================================
 
-boot()
-    .then(() => {
-        app.listen(PORT, () => {
-            console.log("======================================");
-            console.log("Server running on port " + PORT);
-            console.log("Project folder:", __dirname);
-            console.log("Platform:", process.platform);
-            console.log("Architecture:", process.arch);
-            console.log("Deno path:", denoPath);
-            console.log("Deno exists:", fs.existsSync(denoPath));
-            console.log("FFmpeg path:", ffmpegPath);
-            console.log("Downloads path:", downloadsPath);
-            console.log("======================================");
-        });
-    })
-    .catch((error) => {
-        console.error("Fatal boot error:", error.message);
-        process.exit(1);
-    });
+    app.get(
+        "/download/:filename",
+        (req, res) => {
+
+            const filename =
+                path.basename(
+                    req.params.filename
+                );
+
+            const filePath =
+                path.join(
+                    downloadsPath,
+                    filename
+                );
+
+            // ----------------------------------------------------
+            // Security check
+            // ----------------------------------------------------
+
+            if (!filename.endsWith(".mp3")) {
+                return res
+                    .status(400)
+                    .send("Invalid file.");
+            }
+
+            // ----------------------------------------------------
+            // File doesn't exist
+            // ----------------------------------------------------
+
+            if (!fs.existsSync(filePath)) {
+
+                return res
+                    .status(404)
+                    .send("File not found.");
+            }
+
+            console.log(
+                "Sending file:",
+                filename
+            );
+
+            // ----------------------------------------------------
+            // Send file to browser
+            // ----------------------------------------------------
+
+            res.download(
+                filePath,
+                "audio.mp3",
+                (error) => {
+
+                    // ------------------------------------------------
+                    // Delete temporary server file
+                    // ------------------------------------------------
+
+                    try {
+
+                        if (
+                            fs.existsSync(
+                                filePath
+                            )
+                        ) {
+
+                            fs.unlinkSync(
+                                filePath
+                            );
+
+                            console.log(
+                                "Temporary file deleted:",
+                                filename
+                            );
+                        }
+
+                    } catch (deleteError) {
+
+                        console.error(
+                            "File cleanup failed:",
+                            deleteError.message
+                        );
+                    }
+
+                    if (error) {
+
+                        console.error(
+                            "Download error:",
+                            error.message
+                        );
+                    }
+                }
+            );
+        }
+    );
+
+    // ============================================================
+    // HEALTH CHECK
+    // ============================================================
+
+    app.get(
+        "/health",
+        (req, res) => {
+
+            res.json({
+                success: true,
+                status: "online"
+            });
+        }
+    );
+
+    // ============================================================
+    // START SERVER
+    // ============================================================
+
+    app.listen(
+        PORT,
+        () => {
+
+            console.log(
+                "======================================"
+            );
+
+            console.log(
+                "Server running on port " +
+                PORT
+            );
+
+            console.log(
+                "Project folder:",
+                __dirname
+            );
+
+            console.log(
+                "Platform:",
+                process.platform
+            );
+
+            console.log(
+                "Architecture:",
+                process.arch
+            );
+
+            console.log(
+                "Deno path:",
+                denoPath
+            );
+
+            console.log(
+                "Deno exists:",
+                fs.existsSync(denoPath)
+            );
+
+            console.log(
+                "FFmpeg path:",
+                ffmpegPath
+            );
+
+            console.log(
+                "======================================"
+            );
+        }
+    );
