@@ -45,14 +45,11 @@ console.log("Deno exists:", fs.existsSync(denoPath));
 // ============================================================
 // CREATE DOWNLOAD FOLDER
 // ------------------------------------------------------------
-// SPEED TIP (do this outside the code, once, on the server):
-// Mount this folder as tmpfs (RAM-backed) so every write/read/
-// delete during conversion is instant instead of hitting disk:
-//
-//   sudo mkdir -p /path/to/project/downloads
-//   sudo mount -t tmpfs -o size=512M tmpfs /path/to/project/downloads
-//
-// This alone can shave real time off every single conversion.
+// Note: on managed hosting like Render's native runtime, you
+// don't have shell/sudo access to mount tmpfs manually — skip
+// that optimization here. Render's disk is fast enough that
+// this isn't the bottleneck; network fetch + JS challenge
+// solving dominate the conversion time instead.
 // ============================================================
 
 if (!fs.existsSync(downloadsPath)) {
@@ -244,19 +241,14 @@ app.post("/convert", async (req, res) => {
             // DOWNLOAD SPEED
             // =================================================
 
-            // Multi-connection segmented downloading via aria2c.
-            // Requires aria2c installed on the server:
-            //   Debian/Ubuntu: sudo apt install aria2
-            //   macOS:         brew install aria2
-            // If aria2c is not available, remove these two lines
-            // and yt-dlp will fall back to its built-in downloader
-            // (still faster than before thanks to the other fixes,
-            // just not as fast as aria2c).
-            externalDownloader: "aria2c",
-            externalDownloaderArgs: "-x 16 -s 16 -k 1M",
+            // Download fragmented streams concurrently — yt-dlp's
+            // built-in downloader parallelizes fragments natively,
+            // no external tool required. Pushed higher since we're
+            // not relying on aria2c anymore.
+            concurrentFragments: 32,
 
-            // Download fragmented streams concurrently
-            concurrentFragments: 16,
+            // Larger network buffer per chunk — fewer round trips
+            bufferSize: "16K",
 
             // No artificial delay between retries
             retries: 3,
@@ -450,24 +442,6 @@ app.post("/convert", async (req, res) => {
                 success: false,
                 error:
                     "YouTube JavaScript runtime is unavailable on the server."
-            });
-        }
-
-        // ====================================================
-        // ARIA2C MISSING ERROR
-        // ====================================================
-
-        if (
-            errorText.includes("aria2c") &&
-            (errorText.includes("not found") ||
-             errorText.includes("no such file") ||
-             errorText.includes("enoent"))
-        ) {
-
-            return res.status(500).json({
-                success: false,
-                error:
-                    "aria2c is not installed on the server. Install it (e.g. 'apt install aria2') or remove the externalDownloader option."
             });
         }
 
